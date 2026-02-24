@@ -2,14 +2,24 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
-import { DIVISIONS, type ClubProfile, type LevelProgress } from '../types';
+import { DIVISIONS, type ClubProfile, type MatchdayProgress, type DivisionLeague } from '../types';
+import { generateLeagueTeams, simulateAIResults } from '../utils/clubGenerator';
+
+function seededRandom(seed: number): () => number {
+  let s = seed % 2147483647;
+  if (s <= 0) s += 2147483646;
+  return () => {
+    s = (s * 16807) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+}
 
 interface GameState {
   isAuthenticated: boolean;
   supabaseUserId: string | null;
   deviceId: string;
   club: ClubProfile | null;
-  levelProgress: Record<string, LevelProgress>;
+  leagueProgress: Record<string, DivisionLeague>;
   gems: number;
   autoCheck: boolean;
   soundEnabled: boolean;
@@ -19,17 +29,18 @@ interface GameState {
 
   setAuthenticated: (v: boolean, userId?: string | null) => void;
   setClub: (club: ClubProfile) => void;
-  completeLevel: (
+  initDivision: (divisionId: string) => void;
+  completeMatchday: (
     divisionId: string,
-    levelIndex: number,
+    matchdayIndex: number,
     stars: number,
     timeSec: number,
     gemsEarned: number
-  ) => void;
+  ) => { result: 'win' | 'draw' | 'loss'; pointsEarned: number };
   addGems: (amount: number) => void;
   spendGems: (amount: number) => boolean;
-  markFreeHintUsed: (divisionId: string, levelIndex: number) => void;
-  hasFreeHint: (divisionId: string, levelIndex: number) => boolean;
+  markFreeHintUsed: (divisionId: string, matchdayIndex: number) => void;
+  hasFreeHint: (divisionId: string, matchdayIndex: number) => boolean;
   setAutoCheck: (v: boolean) => void;
   setSoundEnabled: (v: boolean) => void;
   setPremium: (v: boolean) => void;
@@ -37,12 +48,11 @@ interface GameState {
   getTotalStars: () => number;
   getDivisionStars: (divisionId: string) => number;
   isDivisionUnlocked: (divisionId: string) => boolean;
-  isLevelUnlocked: (divisionId: string, levelIndex: number) => boolean;
-  getLevelProgress: (divisionId: string, levelIndex: number) => LevelProgress | null;
+  isMatchdayUnlocked: (divisionId: string, matchdayIndex: number) => boolean;
+  getMatchdayProgress: (divisionId: string, matchdayIndex: number) => MatchdayProgress | null;
+  getLeagueTable: (divisionId: string) => DivisionLeague['teams'];
   logout: () => void;
 }
-
-const initialProgress: Record<string, LevelProgress> = {};
 
 export const useGameStore = create<GameState>()(
   persist(
@@ -51,7 +61,7 @@ export const useGameStore = create<GameState>()(
       supabaseUserId: null,
       deviceId: Crypto.randomUUID(),
       club: null,
-      levelProgress: initialProgress,
+      leagueProgress: {},
       gems: 0,
       autoCheck: false,
       soundEnabled: true,
@@ -64,21 +74,140 @@ export const useGameStore = create<GameState>()(
 
       setClub: (club) => set({ club }),
 
-      completeLevel: (divisionId, levelIndex, stars, timeSec, gemsEarned) => {
-        const key = `${divisionId}-${levelIndex}`;
-        const current = get().levelProgress[key];
-        const newProgress: LevelProgress = {
-          starsBest: Math.max(stars, current?.starsBest || 0),
-          bestTimeSec:
-            current?.bestTimeSec != null
-              ? Math.min(timeSec, current.bestTimeSec)
-              : timeSec,
-          completedAt: new Date().toISOString(),
+      initDivision: (divisionId) => {
+        const state = get();
+        if (state.leagueProgress[divisionId]) return;
+
+        const clubName = state.club?.name || 'My Club';
+        const seed = parseInt(divisionId) * 31337;
+        const teams = generateLeagueTeams(divisionId, clubName, seed);
+        const matchdays: MatchdayProgress[] = Array.from({ length: 20 }, () => ({
+          starsBest: 0,
+          bestTimeSec: null,
+          completedAt: null,
+        }));
+
+        const div = DIVISIONS.find((d) => d.id === divisionId);
+        const isGrassroots = divisionId === '10';
+        const status = isGrassroots ? 'unlocked' : 'locked';
+
+        const league: DivisionLeague = {
+          teams,
+          matchdays,
+          currentMatchday: 0,
+          userTeamId: 'user',
+          divisionStatus: status,
         };
+
         set((s) => ({
-          levelProgress: { ...s.levelProgress, [key]: newProgress },
+          leagueProgress: { ...s.leagueProgress, [divisionId]: league },
+        }));
+      },
+
+      completeMatchday: (divisionId, matchdayIndex, stars, timeSec, gemsEarned) => {
+        const state = get();
+        const league = state.leagueProgress[divisionId];
+        if (!league) return { result: 'loss' as const, pointsEarned: 0 };
+
+        const result: 'win' | 'draw' | 'loss' = stars >= 3 ? 'win' : stars >= 2 ? 'draw' : 'loss';
+        const pointsEarned = result === 'win' ? 3 : result === 'draw' ? 1 : 0;
+
+        const newMatchdays = [...league.matchdays];
+        const current = newMatchdays[matchdayIndex];
+        newMatchdays[matchdayIndex] = {
+          starsBest: Math.max(stars, current?.starsBest || 0),
+          bestTimeSec: current?.bestTimeSec != null
+            ? Math.min(timeSec, current.bestTimeSec)
+            : timeSec,
+          completedAt: new Date().toISOString(),
+          result,
+        };
+
+        let newTeams = league.teams.map((t) => ({ ...t }));
+        const userIdx = newTeams.findIndex((t) => t.isUser);
+        if (userIdx >= 0) {
+          newTeams[userIdx].played++;
+          if (result === 'win') {
+            newTeams[userIdx].wins++;
+            newTeams[userIdx].points += 3;
+            newTeams[userIdx].gf += Math.floor(Math.random() * 3) + 1;
+            newTeams[userIdx].ga += Math.floor(Math.random() * 2);
+          } else if (result === 'draw') {
+            newTeams[userIdx].draws++;
+            newTeams[userIdx].points += 1;
+            const goals = Math.floor(Math.random() * 3);
+            newTeams[userIdx].gf += goals;
+            newTeams[userIdx].ga += goals;
+          } else {
+            newTeams[userIdx].losses++;
+            newTeams[userIdx].gf += Math.floor(Math.random() * 2);
+            newTeams[userIdx].ga += Math.floor(Math.random() * 3) + 1;
+          }
+        }
+
+        const simSeed = parseInt(divisionId) * 10000 + matchdayIndex * 137 + 7;
+        const rng = seededRandom(simSeed + Date.now() % 10000);
+        newTeams = simulateAIResults(newTeams, rng);
+
+        const newCurrentMatchday = matchdayIndex + 1;
+        let newStatus = league.divisionStatus;
+
+        if (newCurrentMatchday >= 20) {
+          newStatus = 'completed';
+          const sorted = [...newTeams].sort((a, b) => {
+            if (b.points !== a.points) return b.points - a.points;
+            const gdA = a.gf - a.ga;
+            const gdB = b.gf - b.ga;
+            if (gdB !== gdA) return gdB - gdA;
+            return b.gf - a.gf;
+          });
+          const userPosition = sorted.findIndex((t) => t.isUser) + 1;
+          const divisionTier = parseInt(divisionId);
+
+          if (userPosition <= 3 && divisionTier > 1) {
+            const promoteToDivId = String(divisionTier - 1);
+            const promotionLeague = state.leagueProgress[promoteToDivId];
+            if (!promotionLeague || promotionLeague.divisionStatus === 'locked') {
+              const clubName = state.club?.name || 'My Club';
+              const promoSeed = (divisionTier - 1) * 31337;
+              const promoTeams = generateLeagueTeams(promoteToDivId, clubName, promoSeed);
+              const promoMatchdays: MatchdayProgress[] = Array.from({ length: 20 }, () => ({
+                starsBest: 0,
+                bestTimeSec: null,
+                completedAt: null,
+              }));
+
+              set((s) => ({
+                leagueProgress: {
+                  ...s.leagueProgress,
+                  [promoteToDivId]: {
+                    teams: promoTeams,
+                    matchdays: promoMatchdays,
+                    currentMatchday: 0,
+                    userTeamId: 'user',
+                    divisionStatus: 'unlocked',
+                  },
+                },
+              }));
+            }
+          }
+        }
+
+        set((s) => ({
+          leagueProgress: {
+            ...s.leagueProgress,
+            [divisionId]: {
+              ...league,
+              teams: newTeams,
+              matchdays: newMatchdays,
+              currentMatchday: newCurrentMatchday,
+              divisionStatus: newStatus,
+            },
+          },
           gems: s.gems + gemsEarned,
         }));
+
+        return { result, pointsEarned };
       },
 
       addGems: (amount) => set((s) => ({ gems: s.gems + amount })),
@@ -91,15 +220,15 @@ export const useGameStore = create<GameState>()(
         return false;
       },
 
-      markFreeHintUsed: (divisionId, levelIndex) => {
-        const key = `${divisionId}-${levelIndex}`;
+      markFreeHintUsed: (divisionId, matchdayIndex) => {
+        const key = `${divisionId}-${matchdayIndex}`;
         set((s) => ({
           freeHintsUsed: { ...s.freeHintsUsed, [key]: true },
         }));
       },
 
-      hasFreeHint: (divisionId, levelIndex) => {
-        const key = `${divisionId}-${levelIndex}`;
+      hasFreeHint: (divisionId, matchdayIndex) => {
+        const key = `${divisionId}-${matchdayIndex}`;
         return !get().freeHintsUsed[key];
       },
 
@@ -109,46 +238,59 @@ export const useGameStore = create<GameState>()(
 
       resetProgress: () =>
         set({
-          levelProgress: {},
+          leagueProgress: {},
           gems: 0,
           freeHintsUsed: {},
         }),
 
       getTotalStars: () => {
-        return Object.values(get().levelProgress).reduce(
-          (sum, lp) => sum + lp.starsBest,
-          0
-        );
-      },
-
-      getDivisionStars: (divisionId) => {
-        const progress = get().levelProgress;
+        const progress = get().leagueProgress;
         let total = 0;
-        const div = DIVISIONS.find((d) => d.id === divisionId);
-        if (!div) return 0;
-        for (let i = 0; i < div.levelCount; i++) {
-          const key = `${divisionId}-${i}`;
-          total += progress[key]?.starsBest || 0;
+        for (const divId of Object.keys(progress)) {
+          const league = progress[divId];
+          for (const md of league.matchdays) {
+            total += md.starsBest;
+          }
         }
         return total;
       },
 
+      getDivisionStars: (divisionId) => {
+        const league = get().leagueProgress[divisionId];
+        if (!league) return 0;
+        return league.matchdays.reduce((sum, md) => sum + md.starsBest, 0);
+      },
+
       isDivisionUnlocked: (divisionId) => {
-        const div = DIVISIONS.find((d) => d.id === divisionId);
-        if (!div) return false;
-        return get().getTotalStars() >= div.starsToUnlock;
+        if (divisionId === '10') return true;
+        const league = get().leagueProgress[divisionId];
+        return league?.divisionStatus === 'unlocked' || league?.divisionStatus === 'completed';
       },
 
-      isLevelUnlocked: (divisionId, levelIndex) => {
+      isMatchdayUnlocked: (divisionId, matchdayIndex) => {
         if (!get().isDivisionUnlocked(divisionId)) return false;
-        if (levelIndex === 0) return true;
-        const prevKey = `${divisionId}-${levelIndex - 1}`;
-        return !!get().levelProgress[prevKey]?.completedAt;
+        const league = get().leagueProgress[divisionId];
+        if (!league) return matchdayIndex === 0;
+        if (matchdayIndex === 0) return true;
+        return !!league.matchdays[matchdayIndex - 1]?.completedAt;
       },
 
-      getLevelProgress: (divisionId, levelIndex) => {
-        const key = `${divisionId}-${levelIndex}`;
-        return get().levelProgress[key] || null;
+      getMatchdayProgress: (divisionId, matchdayIndex) => {
+        const league = get().leagueProgress[divisionId];
+        if (!league) return null;
+        return league.matchdays[matchdayIndex] || null;
+      },
+
+      getLeagueTable: (divisionId) => {
+        const league = get().leagueProgress[divisionId];
+        if (!league) return [];
+        return [...league.teams].sort((a, b) => {
+          if (b.points !== a.points) return b.points - a.points;
+          const gdA = a.gf - a.ga;
+          const gdB = b.gf - b.ga;
+          if (gdB !== gdA) return gdB - gdA;
+          return b.gf - a.gf;
+        });
       },
 
       logout: () =>
@@ -165,7 +307,7 @@ export const useGameStore = create<GameState>()(
         supabaseUserId: state.supabaseUserId,
         deviceId: state.deviceId,
         club: state.club,
-        levelProgress: state.levelProgress,
+        leagueProgress: state.leagueProgress,
         gems: state.gems,
         autoCheck: state.autoCheck,
         soundEnabled: state.soundEnabled,

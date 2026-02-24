@@ -66,7 +66,7 @@ function RootLayoutNav() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="level/[levelId]"
+        name="matchday/[divisionId]/[matchdayId]"
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
@@ -76,6 +76,10 @@ function RootLayoutNav() {
           presentation: 'modal',
           gestureEnabled: false,
         }}
+      />
+      <Stack.Screen
+        name="about"
+        options={{ headerShown: false }}
       />
       <Stack.Screen name="+not-found" />
     </Stack>

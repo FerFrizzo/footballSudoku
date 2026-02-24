@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeProvider';
-import { DIFFICULTY_LABELS, type DifficultyTag } from '../types';
 
 interface CompletionModalProps {
   visible: boolean;
@@ -18,7 +17,9 @@ interface CompletionModalProps {
   mistakes: number;
   hintsUsed: number;
   gemsEarned: number;
-  difficulty: DifficultyTag;
+  divisionName: string;
+  matchResult: 'win' | 'draw' | 'loss';
+  pointsEarned: number;
   onContinue: () => void;
 }
 
@@ -28,6 +29,12 @@ function formatTime(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
+const RESULT_CONFIG = {
+  win: { label: 'WIN', color: '#388E3C', icon: 'checkmark-circle' as const },
+  draw: { label: 'DRAW', color: '#F57F17', icon: 'remove-circle' as const },
+  loss: { label: 'LOSS', color: '#D32F2F', icon: 'close-circle' as const },
+};
+
 export default function CompletionModal({
   visible,
   stars,
@@ -35,20 +42,30 @@ export default function CompletionModal({
   mistakes,
   hintsUsed,
   gemsEarned,
-  difficulty,
+  divisionName,
+  matchResult,
+  pointsEarned,
   onContinue,
 }: CompletionModalProps) {
   const theme = useTheme();
+  const resultCfg = RESULT_CONFIG[matchResult];
 
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
         <View style={[styles.card, { backgroundColor: theme.surface }]}>
+          <View style={[styles.resultBadge, { backgroundColor: resultCfg.color }]}>
+            <Ionicons name={resultCfg.icon} size={20} color="#FFF" />
+            <Text style={styles.resultText}>
+              {resultCfg.label} +{pointsEarned}pts
+            </Text>
+          </View>
+
           <Text style={[styles.title, { color: theme.text }]}>
-            Match Complete!
+            Matchday Complete!
           </Text>
           <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-            {DIFFICULTY_LABELS[difficulty]}
+            {divisionName}
           </Text>
 
           <View style={styles.starsRow}>
@@ -152,21 +169,34 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 28,
     alignItems: 'center',
-    gap: 16,
+    gap: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.15,
     shadowRadius: 24,
     elevation: 10,
   },
+  resultBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  resultText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontFamily: 'Inter_700Bold',
+  },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontFamily: 'Inter_700Bold',
   },
   subtitle: {
     fontSize: 14,
     fontFamily: 'Inter_500Medium',
-    marginTop: -8,
+    marginTop: -4,
   },
   starsRow: {
     flexDirection: 'row',

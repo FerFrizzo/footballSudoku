@@ -47,22 +47,22 @@ type UndoEntry = {
   notes: number[][][];
 };
 
-export default function LevelScreen() {
-  const { levelId } = useLocalSearchParams<{ levelId: string }>();
+export default function MatchdayScreen() {
+  const { divisionId, matchdayId } = useLocalSearchParams<{
+    divisionId: string;
+    matchdayId: string;
+  }>();
   const insets = useSafeAreaInsets();
   const theme = useTheme();
 
-  const parts = (levelId || '').split('-');
-  const divisionId = parts[0] || '1';
-  const levelIndex = parseInt(parts[1] || '0', 10);
-
+  const matchdayIndex = parseInt(matchdayId || '0', 10);
   const division = DIVISIONS.find((d) => d.id === divisionId);
-  const difficulty = division?.difficulty || 'medium';
+  const divisionTier = division?.tier || 10;
 
   const autoCheck = useGameStore((s) => s.autoCheck);
   const isPremium = useGameStore((s) => s.isPremium);
   const gems = useGameStore((s) => s.gems);
-  const completeLevel = useGameStore((s) => s.completeLevel);
+  const completeMatchday = useGameStore((s) => s.completeMatchday);
   const spendGems = useGameStore((s) => s.spendGems);
   const hasFreeHint = useGameStore((s) => s.hasFreeHint);
   const markFreeHintUsed = useGameStore((s) => s.markFreeHintUsed);
@@ -85,6 +85,8 @@ export default function LevelScreen() {
   const [completionData, setCompletionData] = useState({
     stars: 0,
     gemsEarned: 0,
+    matchResult: 'loss' as 'win' | 'draw' | 'loss',
+    pointsEarned: 0,
   });
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -94,7 +96,7 @@ export default function LevelScreen() {
 
   const hintsAvailable = isPremium
     ? PREMIUM_HINTS_PER_LEVEL - hintsUsed
-    : hasFreeHint(divisionId, levelIndex)
+    : hasFreeHint(divisionId || '10', matchdayIndex)
       ? FREE_HINTS_PER_LEVEL
       : 0;
 
@@ -103,10 +105,10 @@ export default function LevelScreen() {
     const givens = getGivensForLevel(
       division.givensMin,
       division.givensMax,
-      levelIndex,
+      matchdayIndex,
       division.levelCount
     );
-    const seed = getPuzzleSeed(divisionId, levelIndex);
+    const seed = getPuzzleSeed(divisionId || '10', matchdayIndex);
     const { puzzle, solution: sol } = generatePuzzle(givens, seed);
 
     setBoard(deepCopy2D(puzzle));
@@ -120,12 +122,12 @@ export default function LevelScreen() {
     setLoading(false);
 
     trackEvent(
-      'level_start',
-      { division: divisionId, levelId: levelIndex, difficulty },
+      'matchday_start',
+      { divisionId, matchdayId: matchdayIndex, difficulty: divisionTier },
       userId,
       deviceId
     );
-  }, [divisionId, levelIndex]);
+  }, [divisionId, matchdayIndex]);
 
   useEffect(() => {
     if (loading) return;
@@ -164,33 +166,40 @@ export default function LevelScreen() {
       isCompleteRef.current = true;
       if (timerRef.current) clearInterval(timerRef.current);
 
-      const stars = calculateStars(timer, mistakes, hintsUsed, difficulty);
+      const stars = calculateStars(timer, mistakes, hintsUsed, divisionTier);
       const gemsEarned = calculateGems(stars);
 
-      completeLevel(divisionId, levelIndex, stars, timer, gemsEarned);
+      const { result, pointsEarned } = completeMatchday(
+        divisionId || '10',
+        matchdayIndex,
+        stars,
+        timer,
+        gemsEarned
+      );
 
       trackEvent(
-        'level_complete',
+        'matchday_complete',
         {
-          division: divisionId,
-          levelId: levelIndex,
+          divisionId,
+          matchdayId: matchdayIndex,
           timeSec: timer,
           mistakes,
           hintsUsed,
           stars,
           gemsEarned,
+          result,
         },
         userId,
         deviceId
       );
 
-      setCompletionData({ stars, gemsEarned });
+      setCompletionData({ stars, gemsEarned, matchResult: result, pointsEarned });
       setTimeout(() => {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         setShowCompletion(true);
       }, 300);
     },
-    [solution, timer, mistakes, hintsUsed, difficulty, divisionId, levelIndex]
+    [solution, timer, mistakes, hintsUsed, divisionTier, divisionId, matchdayIndex]
   );
 
   function pushUndo() {
@@ -289,10 +298,11 @@ export default function LevelScreen() {
 
   function handleHint() {
     if (isCompleteRef.current) return;
+    const did = divisionId || '10';
 
     if (!isPremium) {
-      if (hasFreeHint(divisionId, levelIndex)) {
-        markFreeHintUsed(divisionId, levelIndex);
+      if (hasFreeHint(did, matchdayIndex)) {
+        markFreeHintUsed(did, matchdayIndex);
       } else if (gems >= HINT_COST_GEMS) {
         const spent = spendGems(HINT_COST_GEMS);
         if (!spent) {
@@ -352,7 +362,7 @@ export default function LevelScreen() {
 
     trackEvent(
       'hint_used',
-      { division: divisionId, levelId: levelIndex },
+      { divisionId, matchdayId: matchdayIndex },
       userId,
       deviceId
     );
@@ -384,7 +394,7 @@ export default function LevelScreen() {
   }
 
   function handleQuit() {
-    Alert.alert('Quit Level', 'Your progress on this puzzle will be lost.', [
+    Alert.alert('Quit Matchday', 'Your progress on this puzzle will be lost.', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Quit',
@@ -437,7 +447,7 @@ export default function LevelScreen() {
 
         <View style={styles.headerCenter}>
           <Text style={[styles.levelLabel, { color: theme.textOnPrimary }]}>
-            {division?.name || 'Level'} - {levelIndex + 1}
+            {division?.name || 'Division'} - MD {matchdayIndex + 1}
           </Text>
           <View style={styles.timerRow}>
             <Ionicons
@@ -499,7 +509,9 @@ export default function LevelScreen() {
         mistakes={mistakes}
         hintsUsed={hintsUsed}
         gemsEarned={completionData.gemsEarned}
-        difficulty={difficulty}
+        divisionName={division?.name || 'Division'}
+        matchResult={completionData.matchResult}
+        pointsEarned={completionData.pointsEarned}
         onContinue={handleContinue}
       />
     </View>

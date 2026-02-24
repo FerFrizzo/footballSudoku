@@ -181,17 +181,22 @@ export function calculateStars(
   timeSec: number,
   mistakes: number,
   hintsUsed: number,
-  difficulty: string
+  divisionTier: number
 ): number {
-  const timeThresholds: Record<string, number> = {
-    super_easy: 300,
-    easy: 480,
-    medium: 600,
-    hard: 900,
-    very_hard: 1200,
+  const baseThresholds: Record<number, number> = {
+    10: 300,
+    9: 360,
+    8: 420,
+    7: 480,
+    6: 540,
+    5: 600,
+    4: 720,
+    3: 840,
+    2: 960,
+    1: 1200,
   };
 
-  const threshold = timeThresholds[difficulty] || 600;
+  const threshold = baseThresholds[divisionTier] || 600;
   let stars = 1;
   if (mistakes <= 2 && hintsUsed <= 1) stars = 2;
   if (mistakes === 0 && hintsUsed === 0 && timeSec < threshold) stars = 3;
@@ -204,8 +209,8 @@ export function calculateGems(stars: number): number {
   return 5;
 }
 
-export function getPuzzleSeed(divisionId: string, levelIndex: number): number {
-  return parseInt(divisionId) * 10000 + levelIndex * 137 + 42;
+export function getPuzzleSeed(divisionId: string, matchdayIndex: number): number {
+  return parseInt(divisionId) * 10000 + matchdayIndex * 137 + 42;
 }
 
 export function hasConflicts(

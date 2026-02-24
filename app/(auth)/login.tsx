@@ -128,7 +128,7 @@ export default function LoginScreen() {
           </View>
           <Text style={styles.title}>Story Mode Sudoku</Text>
           <Text style={styles.subtitle}>
-            Rise through the English football pyramid
+            Rise through the football pyramid
           </Text>
         </View>
 

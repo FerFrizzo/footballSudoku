@@ -13,6 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { router } from 'expo-router';
 
 import { useTheme } from '@/src/theme/ThemeProvider';
 import { useGameStore } from '@/src/state/gameStore';
@@ -59,7 +60,7 @@ export default function SettingsScreen() {
   function handleReset() {
     Alert.alert(
       'Reset Progress',
-      'This will erase all your stars, gems, and level progress. This cannot be undone.',
+      'This will erase all your stars, gems, league tables, and matchday progress. This cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -262,6 +263,26 @@ export default function SettingsScreen() {
           <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>
             Account
           </Text>
+          <Pressable
+            onPress={() => router.push('/about')}
+            style={({ pressed }) => [
+              styles.settingRow,
+              { opacity: pressed ? 0.7 : 1 },
+            ]}
+          >
+            <View style={styles.settingLabel}>
+              <Ionicons
+                name="information-circle-outline"
+                size={20}
+                color={theme.text}
+              />
+              <Text style={[styles.settingText, { color: theme.text }]}>
+                About
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} />
+          </Pressable>
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
           <Pressable
             onPress={handleReset}
             style={({ pressed }) => [

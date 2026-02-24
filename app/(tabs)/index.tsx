@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -25,10 +25,15 @@ export default function PyramidMapScreen() {
   const getTotalStars = useGameStore((s) => s.getTotalStars);
   const getDivisionStars = useGameStore((s) => s.getDivisionStars);
   const isDivisionUnlocked = useGameStore((s) => s.isDivisionUnlocked);
+  const initDivision = useGameStore((s) => s.initDivision);
 
   const totalStars = getTotalStars();
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
   const webBottomInset = Platform.OS === 'web' ? 34 : 0;
+
+  useEffect(() => {
+    initDivision('10');
+  }, []);
 
   const reversedDivisions = [...DIVISIONS].reverse();
 
@@ -105,7 +110,7 @@ export default function PyramidMapScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Text style={[styles.sectionTitle, { color: theme.text }]}>
-          Season Journey
+          The Pyramid
         </Text>
 
         {reversedDivisions.map((div, index) => {
@@ -120,6 +125,7 @@ export default function PyramidMapScreen() {
                 onPress={() => {
                   if (unlocked) {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    initDivision(div.id);
                     router.push(`/division/${div.id}`);
                   } else {
                     Haptics.notificationAsync(
@@ -151,27 +157,40 @@ export default function PyramidMapScreen() {
                     {unlocked ? (
                       <Ionicons
                         name={div.icon as any}
-                        size={22}
+                        size={20}
                         color={theme.primary}
                       />
                     ) : (
                       <Ionicons
                         name="lock-closed"
-                        size={22}
+                        size={20}
                         color="#BDBDBD"
                       />
                     )}
                   </View>
 
                   <View style={styles.divInfo}>
-                    <Text
-                      style={[
-                        styles.divName,
-                        { color: unlocked ? theme.text : '#BDBDBD' },
-                      ]}
-                    >
-                      {div.name}
-                    </Text>
+                    <View style={styles.divNameRow}>
+                      <Text
+                        style={[
+                          styles.divName,
+                          { color: unlocked ? theme.text : '#BDBDBD' },
+                        ]}
+                      >
+                        {div.name}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.tierBadge,
+                          {
+                            color: unlocked ? theme.textSecondary : '#BDBDBD',
+                            backgroundColor: unlocked ? theme.cellHighlight : '#F0F0F0',
+                          },
+                        ]}
+                      >
+                        T{div.tier}
+                      </Text>
+                    </View>
                     <Text
                       style={[
                         styles.divSubtitle,
@@ -183,11 +202,11 @@ export default function PyramidMapScreen() {
                       ]}
                     >
                       {unlocked
-                        ? `${div.subtitle} - ${divStars}/${maxStars} stars`
-                        : `Need ${div.starsToUnlock} stars to unlock`}
+                        ? `${divStars}/${maxStars} stars`
+                        : 'Locked - Earn promotion'}
                     </Text>
 
-                    {unlocked && (
+                    {unlocked && divStars > 0 && (
                       <View style={styles.progressBarBg}>
                         <View
                           style={[
@@ -284,11 +303,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontFamily: 'Inter_700Bold',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   divisionCard: {
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: 14,
+    padding: 14,
     borderLeftWidth: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -299,12 +318,12 @@ const styles = StyleSheet.create({
   divCardContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
+    gap: 12,
   },
   divIconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -312,19 +331,32 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
   },
+  divNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   divName: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: 'Inter_700Bold',
   },
+  tierBadge: {
+    fontSize: 10,
+    fontFamily: 'Inter_600SemiBold',
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
   divSubtitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: 'Inter_400Regular',
   },
   progressBarBg: {
-    height: 4,
+    height: 3,
     backgroundColor: '#E0E0E0',
     borderRadius: 2,
-    marginTop: 6,
+    marginTop: 4,
     overflow: 'hidden',
   },
   progressBarFill: {
@@ -333,12 +365,12 @@ const styles = StyleSheet.create({
   },
   connectorLine: {
     alignItems: 'center',
-    height: 24,
+    height: 16,
     justifyContent: 'center',
   },
   line: {
-    width: 3,
-    height: 24,
-    borderRadius: 1.5,
+    width: 2,
+    height: 16,
+    borderRadius: 1,
   },
 });
