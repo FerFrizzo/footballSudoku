@@ -1,0 +1,418 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  StyleSheet,
+  ScrollView,
+  Image,
+  Alert,
+  Platform,
+  KeyboardAvoidingView,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as ImagePicker from 'expo-image-picker';
+import * as Haptics from 'expo-haptics';
+import { Ionicons } from '@expo/vector-icons';
+
+import { useGameStore } from '@/src/state/gameStore';
+import { trackEvent } from '@/src/services/analytics';
+import ColorPicker from '@/src/components/ColorPicker';
+
+export default function ClubSetupScreen() {
+  const insets = useSafeAreaInsets();
+  const [name, setName] = useState('');
+  const [badgeUri, setBadgeUri] = useState<string | null>(null);
+  const [primaryColor, setPrimaryColor] = useState('#1B5E20');
+  const [secondaryColor, setSecondaryColor] = useState('#FFD600');
+  const [step, setStep] = useState(0);
+
+  const setClub = useGameStore((s) => s.setClub);
+  const deviceId = useGameStore((s) => s.deviceId);
+  const userId = useGameStore((s) => s.supabaseUserId);
+
+  const webTopInset = Platform.OS === 'web' ? 67 : 0;
+
+  async function pickImage() {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Please allow access to your photos.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setBadgeUri(result.assets[0].uri);
+    }
+  }
+
+  function handleCreate() {
+    if (!name.trim()) {
+      Alert.alert('Club Name', 'Please enter a club name.');
+      return;
+    }
+    setClub({
+      name: name.trim(),
+      badgeUri,
+      primaryColor,
+      secondaryColor,
+    });
+    trackEvent('club_created', { clubName: name.trim() }, userId, deviceId);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  }
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView
+        contentContainerStyle={[
+          styles.container,
+          {
+            paddingTop: insets.top + 24 + webTopInset,
+            paddingBottom: insets.bottom + 24,
+          },
+        ]}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.title}>Create Your Club</Text>
+        <Text style={styles.subtitle}>
+          Set up your football identity for the season ahead
+        </Text>
+
+        {step === 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Club Name</Text>
+            <View style={styles.inputWrapper}>
+              <Ionicons
+                name="shield-outline"
+                size={20}
+                color="#9E9E9E"
+                style={styles.inputIcon}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter club name"
+                placeholderTextColor="#9E9E9E"
+                value={name}
+                onChangeText={setName}
+                maxLength={30}
+              />
+            </View>
+
+            <Text style={[styles.sectionTitle, { marginTop: 24 }]}>
+              Club Badge (Optional)
+            </Text>
+            <Pressable
+              onPress={pickImage}
+              style={({ pressed }) => [
+                styles.badgePicker,
+                { opacity: pressed ? 0.8 : 1 },
+              ]}
+            >
+              {badgeUri ? (
+                <Image source={{ uri: badgeUri }} style={styles.badgeImage} />
+              ) : (
+                <View style={styles.badgePlaceholder}>
+                  <Ionicons name="camera-outline" size={32} color="#9E9E9E" />
+                  <Text style={styles.badgeText}>Tap to select</Text>
+                </View>
+              )}
+            </Pressable>
+
+            <Pressable
+              onPress={() => {
+                if (!name.trim()) {
+                  Alert.alert('Club Name', 'Please enter a club name.');
+                  return;
+                }
+                setStep(1);
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }}
+              style={({ pressed }) => [
+                styles.nextBtn,
+                {
+                  opacity: pressed ? 0.9 : 1,
+                  transform: [{ scale: pressed ? 0.98 : 1 }],
+                },
+              ]}
+            >
+              <Text style={styles.nextBtnText}>Choose Colors</Text>
+              <Ionicons name="arrow-forward" size={20} color="#FFF" />
+            </Pressable>
+          </View>
+        )}
+
+        {step === 1 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Primary Color</Text>
+            <Text style={styles.sectionHint}>
+              Used for headers, buttons and main elements
+            </Text>
+            <ColorPicker
+              selectedColor={primaryColor}
+              onSelect={(c) => {
+                setPrimaryColor(c);
+                Haptics.selectionAsync();
+              }}
+            />
+
+            <Text style={[styles.sectionTitle, { marginTop: 28 }]}>
+              Secondary Color
+            </Text>
+            <Text style={styles.sectionHint}>
+              Used for accents, stars and highlights
+            </Text>
+            <ColorPicker
+              selectedColor={secondaryColor}
+              onSelect={(c) => {
+                setSecondaryColor(c);
+                Haptics.selectionAsync();
+              }}
+            />
+
+            <View style={styles.previewRow}>
+              <View
+                style={[styles.previewSwatch, { backgroundColor: primaryColor }]}
+              >
+                <Text
+                  style={[
+                    styles.previewLabel,
+                    { color: getLuminance(primaryColor) > 0.4 ? '#000' : '#FFF' },
+                  ]}
+                >
+                  Primary
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.previewSwatch,
+                  { backgroundColor: secondaryColor },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.previewLabel,
+                    {
+                      color:
+                        getLuminance(secondaryColor) > 0.4 ? '#000' : '#FFF',
+                    },
+                  ]}
+                >
+                  Secondary
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.btnRow}>
+              <Pressable
+                onPress={() => setStep(0)}
+                style={({ pressed }) => [
+                  styles.backBtn,
+                  { opacity: pressed ? 0.8 : 1 },
+                ]}
+              >
+                <Ionicons name="arrow-back" size={20} color="#1B5E20" />
+                <Text style={styles.backBtnText}>Back</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={handleCreate}
+                style={({ pressed }) => [
+                  styles.createBtn,
+                  {
+                    backgroundColor: primaryColor,
+                    opacity: pressed ? 0.9 : 1,
+                    transform: [{ scale: pressed ? 0.98 : 1 }],
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.createBtnText,
+                    {
+                      color:
+                        getLuminance(primaryColor) > 0.4 ? '#000' : '#FFF',
+                    },
+                  ]}
+                >
+                  Start Season
+                </Text>
+                <Ionicons
+                  name="football"
+                  size={18}
+                  color={getLuminance(primaryColor) > 0.4 ? '#000' : '#FFF'}
+                />
+              </Pressable>
+            </View>
+          </View>
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+function getLuminance(hex: string): number {
+  const cleaned = hex.replace('#', '');
+  if (cleaned.length !== 6) return 0.5;
+  const rgb = [
+    parseInt(cleaned.substring(0, 2), 16),
+    parseInt(cleaned.substring(2, 4), 16),
+    parseInt(cleaned.substring(4, 6), 16),
+  ].map((c) => {
+    c = c / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+}
+
+const styles = StyleSheet.create({
+  flex: { flex: 1, backgroundColor: '#F5F5F0' },
+  container: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    gap: 12,
+  },
+  title: {
+    fontSize: 28,
+    fontFamily: 'Inter_700Bold',
+    color: '#1A1A1A',
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 15,
+    fontFamily: 'Inter_400Regular',
+    color: '#757575',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  section: {
+    gap: 12,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontFamily: 'Inter_600SemiBold',
+    color: '#1A1A1A',
+  },
+  sectionHint: {
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    color: '#9E9E9E',
+    marginTop: -8,
+    marginBottom: 4,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    paddingHorizontal: 14,
+  },
+  inputIcon: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    paddingVertical: 16,
+    fontSize: 16,
+    fontFamily: 'Inter_400Regular',
+    color: '#1A1A1A',
+  },
+  badgePicker: {
+    alignSelf: 'center',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#E0E0E0',
+    borderStyle: 'dashed',
+  },
+  badgeImage: {
+    width: '100%',
+    height: '100%',
+  },
+  badgePlaceholder: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FAFAFA',
+    gap: 4,
+  },
+  badgeText: {
+    fontSize: 11,
+    fontFamily: 'Inter_400Regular',
+    color: '#9E9E9E',
+  },
+  nextBtn: {
+    backgroundColor: '#1B5E20',
+    paddingVertical: 16,
+    borderRadius: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 12,
+  },
+  nextBtnText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontFamily: 'Inter_600SemiBold',
+  },
+  previewRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16,
+  },
+  previewSwatch: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  previewLabel: {
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+  },
+  btnRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16,
+  },
+  backBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  backBtnText: {
+    fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
+    color: '#1B5E20',
+  },
+  createBtn: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  createBtnText: {
+    fontSize: 16,
+    fontFamily: 'Inter_600SemiBold',
+  },
+});
