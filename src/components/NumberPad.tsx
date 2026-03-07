@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeProvider';
 
 interface NumberPadProps {
+  board: number[][];
   onNumberPress: (num: number) => void;
   onErasePress: () => void;
   onNotesToggle: () => void;
@@ -14,7 +15,21 @@ interface NumberPadProps {
   canUndo: boolean;
 }
 
+function computeRemaining(board: number[][]): Record<number, number> {
+  const counts: Record<number, number> = {};
+  for (let n = 1; n <= 9; n++) counts[n] = 0;
+  for (const row of board) {
+    for (const val of row) {
+      if (val >= 1 && val <= 9) counts[val]++;
+    }
+  }
+  const remaining: Record<number, number> = {};
+  for (let n = 1; n <= 9; n++) remaining[n] = 9 - counts[n];
+  return remaining;
+}
+
 export default function NumberPad({
+  board,
   onNumberPress,
   onErasePress,
   onNotesToggle,
@@ -25,6 +40,7 @@ export default function NumberPad({
   canUndo,
 }: NumberPadProps) {
   const theme = useTheme();
+  const remaining = computeRemaining(board);
 
   return (
     <View style={styles.container}>
@@ -108,31 +124,63 @@ export default function NumberPad({
       </View>
 
       <View style={styles.numbers}>
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-          <Pressable
-            key={num}
-            onPress={() => onNumberPress(num)}
-            style={({ pressed }) => [
-              styles.numBtn,
-              {
-                backgroundColor: pressed ? theme.primary : theme.surface,
-                borderColor: theme.border,
-              },
-            ]}
-            testID={`num-${num}`}
-          >
-            {({ pressed }) => (
-              <Text
-                style={[
-                  styles.numText,
-                  { color: pressed ? theme.textOnPrimary : theme.primary },
-                ]}
-              >
-                {num}
-              </Text>
-            )}
-          </Pressable>
-        ))}
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => {
+          const left = remaining[num];
+          const isComplete = left === 0;
+
+          return (
+            <Pressable
+              key={num}
+              onPress={() => !isComplete && onNumberPress(num)}
+              style={({ pressed }) => [
+                styles.numBtn,
+                {
+                  backgroundColor: isComplete
+                    ? theme.surfaceAlt
+                    : pressed
+                      ? theme.primary
+                      : theme.surface,
+                  borderColor: isComplete ? theme.border : theme.border,
+                  opacity: isComplete ? 0.35 : 1,
+                },
+              ]}
+              testID={`num-${num}`}
+            >
+              {({ pressed }) => (
+                <View style={styles.numBtnInner}>
+                  {!isComplete && (
+                    <Text
+                      style={[
+                        styles.remainingText,
+                        {
+                          color: pressed
+                            ? 'rgba(255,255,255,0.75)'
+                            : theme.textSecondary,
+                        },
+                      ]}
+                    >
+                      {left}
+                    </Text>
+                  )}
+                  <Text
+                    style={[
+                      styles.numText,
+                      {
+                        color: isComplete
+                          ? theme.textSecondary
+                          : pressed
+                            ? theme.textOnPrimary
+                            : theme.primary,
+                      },
+                    ]}
+                  >
+                    {num}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+          );
+        })}
       </View>
     </View>
   );
@@ -168,14 +216,25 @@ const styles = StyleSheet.create({
   },
   numBtn: {
     width: 36,
-    height: 48,
+    height: 52,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
   },
+  numBtnInner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 0,
+  },
+  remainingText: {
+    fontSize: 10,
+    fontFamily: 'Inter_600SemiBold',
+    lineHeight: 12,
+  },
   numText: {
     fontSize: 20,
     fontFamily: 'Inter_700Bold',
+    lineHeight: 24,
   },
 });

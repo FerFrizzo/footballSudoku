@@ -491,6 +491,7 @@ export default function MatchdayScreen() {
 
       <View style={[styles.padWrapper, { paddingBottom: insets.bottom + 16 }]}>
         <NumberPad
+          board={board}
           onNumberPress={handleNumberPress}
           onErasePress={handleErase}
           onNotesToggle={() => setIsNotesMode(!isNotesMode)}

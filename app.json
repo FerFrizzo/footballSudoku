@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Story Mode Sudoku",
-    "slug": "story-mode-sudoku",
+    "name": "Football Sudoku",
+    "slug": "footballsudoku",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "footballsudoku",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -15,10 +15,10 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.myapp"
+      "bundleIdentifier": "com.footballsudoku.app"
     },
     "android": {
-      "package": "com.myapp",
+      "package": "com.footballsudoku.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
