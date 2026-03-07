@@ -62,10 +62,10 @@ export default function CompletionModal({
           </View>
 
           <Text style={[styles.title, { color: theme.text }]}>
-            Matchday Complete!
+            {matchResult === 'loss' ? 'Matchday Over' : 'Matchday Complete!'}
           </Text>
           <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-            {divisionName}
+            {matchResult === 'loss' ? 'Too many mistakes' : divisionName}
           </Text>
 
           <View style={styles.starsRow}>

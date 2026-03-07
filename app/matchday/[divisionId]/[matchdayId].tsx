@@ -155,18 +155,16 @@ export default function MatchdayScreen() {
     })
   );
 
-  const checkCompletion = useCallback(
-    (newBoard: number[][]) => {
+  const MAX_MISTAKES = 3;
+
+  const triggerEnd = useCallback(
+    (forcedStars?: number, currentMistakes?: number) => {
       if (isCompleteRef.current) return;
-      for (let r = 0; r < 9; r++) {
-        for (let c = 0; c < 9; c++) {
-          if (newBoard[r][c] !== solution[r][c]) return;
-        }
-      }
       isCompleteRef.current = true;
       if (timerRef.current) clearInterval(timerRef.current);
 
-      const stars = calculateStars(timer, mistakes, hintsUsed, divisionTier);
+      const mistakesCount = currentMistakes ?? mistakes;
+      const stars = forcedStars ?? calculateStars(timer, mistakesCount, hintsUsed, divisionTier);
       const gemsEarned = calculateGems(stars);
 
       const { result, pointsEarned } = completeMatchday(
@@ -183,7 +181,7 @@ export default function MatchdayScreen() {
           divisionId,
           matchdayId: matchdayIndex,
           timeSec: timer,
-          mistakes,
+          mistakes: mistakesCount,
           hintsUsed,
           stars,
           gemsEarned,
@@ -195,11 +193,28 @@ export default function MatchdayScreen() {
 
       setCompletionData({ stars, gemsEarned, matchResult: result, pointsEarned });
       setTimeout(() => {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Haptics.notificationAsync(
+          forcedStars === 1
+            ? Haptics.NotificationFeedbackType.Error
+            : Haptics.NotificationFeedbackType.Success
+        );
         setShowCompletion(true);
-      }, 300);
+      }, 400);
     },
     [solution, timer, mistakes, hintsUsed, divisionTier, divisionId, matchdayIndex]
+  );
+
+  const checkCompletion = useCallback(
+    (newBoard: number[][], currentMistakes?: number) => {
+      if (isCompleteRef.current) return;
+      for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+          if (newBoard[r][c] !== solution[r][c]) return;
+        }
+      }
+      triggerEnd(undefined, currentMistakes);
+    },
+    [solution, triggerEnd]
   );
 
   function pushUndo() {
@@ -241,9 +256,17 @@ export default function MatchdayScreen() {
       const newBoard = deepCopy2D(board);
       newBoard[selectedRow][selectedCol] = num;
 
+      let newMistakes = mistakes;
       if (num !== solution[selectedRow][selectedCol]) {
-        setMistakes((m) => m + 1);
+        newMistakes = mistakes + 1;
+        setMistakes(newMistakes);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+
+        if (newMistakes >= MAX_MISTAKES) {
+          setBoard(newBoard);
+          triggerEnd(1, newMistakes);
+          return;
+        }
       } else {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
@@ -270,7 +293,7 @@ export default function MatchdayScreen() {
 
       setBoard(newBoard);
       setNotes(newNotes);
-      checkCompletion(newBoard);
+      checkCompletion(newBoard, newMistakes);
     }
   }
 
@@ -459,16 +482,14 @@ export default function MatchdayScreen() {
               {timerText}
             </Text>
             <View style={styles.mistakesBadge}>
-              <Ionicons
-                name="close-circle"
-                size={12}
-                color={theme.error}
-              />
-              <Text
-                style={[styles.mistakesText, { color: theme.textOnPrimary }]}
-              >
-                {mistakes}
-              </Text>
+              {[0, 1, 2].map((i) => (
+                <Ionicons
+                  key={i}
+                  name={i < mistakes ? 'close-circle' : 'close-circle-outline'}
+                  size={16}
+                  color={i < mistakes ? theme.error : 'rgba(255,255,255,0.4)'}
+                />
+              ))}
             </View>
           </View>
         </View>
