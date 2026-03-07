@@ -264,7 +264,7 @@ export default function MatchdayScreen() {
 
         if (newMistakes >= MAX_MISTAKES) {
           setBoard(newBoard);
-          triggerEnd(1, newMistakes);
+          triggerEnd(0, newMistakes);
           return;
         }
       } else {

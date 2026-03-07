@@ -183,30 +183,17 @@ export function calculateStars(
   hintsUsed: number,
   divisionTier: number
 ): number {
-  const baseThresholds: Record<number, number> = {
-    10: 300,
-    9: 360,
-    8: 420,
-    7: 480,
-    6: 540,
-    5: 600,
-    4: 720,
-    3: 840,
-    2: 960,
-    1: 1200,
-  };
-
-  const threshold = baseThresholds[divisionTier] || 600;
-  let stars = 1;
-  if (mistakes <= 2 && hintsUsed <= 1) stars = 2;
-  if (mistakes === 0 && hintsUsed === 0 && timeSec < threshold) stars = 3;
-  return stars;
+  if (mistakes === 0) return 3;
+  if (mistakes === 1) return 2;
+  if (mistakes === 2) return 1;
+  return 0;
 }
 
 export function calculateGems(stars: number): number {
   if (stars === 3) return 15;
   if (stars === 2) return 10;
-  return 5;
+  if (stars === 1) return 5;
+  return 0;
 }
 
 export function getPuzzleSeed(divisionId: string, matchdayIndex: number): number {

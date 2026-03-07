@@ -109,7 +109,7 @@ export const useGameStore = create<GameState>()(
         const league = state.leagueProgress[divisionId];
         if (!league) return { result: 'loss' as const, pointsEarned: 0 };
 
-        const result: 'win' | 'draw' | 'loss' = stars >= 3 ? 'win' : stars >= 2 ? 'draw' : 'loss';
+        const result: 'win' | 'draw' | 'loss' = stars === 3 ? 'win' : stars >= 1 ? 'draw' : 'loss';
         const pointsEarned = result === 'win' ? 3 : result === 'draw' ? 1 : 0;
 
         const newMatchdays = [...league.matchdays];
