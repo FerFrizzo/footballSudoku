@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/src/theme/ThemeProvider';
 import { useGameStore } from '@/src/state/gameStore';
@@ -20,6 +21,7 @@ import { DIVISIONS } from '@/src/types';
 export default function PyramidMapScreen() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const { t } = useTranslation();
   const club = useGameStore((s) => s.club);
   const gems = useGameStore((s) => s.gems);
   const getTotalStars = useGameStore((s) => s.getTotalStars);
@@ -74,7 +76,7 @@ export default function PyramidMapScreen() {
                 style={[styles.clubName, { color: theme.textOnPrimary }]}
                 numberOfLines={1}
               >
-                {club?.name || 'My Club'}
+                {club?.name || t('home.myClub')}
               </Text>
               <View style={styles.statsRow}>
                 <Ionicons name="star" size={13} color={theme.starFilled} />
@@ -110,7 +112,7 @@ export default function PyramidMapScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Text style={[styles.sectionTitle, { color: theme.text }]}>
-          The Pyramid
+          {t('home.thePyramid')}
         </Text>
 
         {reversedDivisions.map((div, index) => {
@@ -202,8 +204,8 @@ export default function PyramidMapScreen() {
                       ]}
                     >
                       {unlocked
-                        ? `${divStars}/${maxStars} stars`
-                        : 'Locked - Earn promotion'}
+                        ? t('home.starsProgress', { current: divStars, max: maxStars })
+                        : t('home.locked')}
                     </Text>
 
                     {unlocked && divStars > 0 && (

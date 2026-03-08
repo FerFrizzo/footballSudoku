@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { useGameStore } from '@/src/state/gameStore';
 import { trackEvent } from '@/src/services/analytics';
@@ -22,6 +23,7 @@ import ColorPicker from '@/src/components/ColorPicker';
 
 export default function ClubSetupScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [badgeUri, setBadgeUri] = useState<string | null>(null);
   const [primaryColor, setPrimaryColor] = useState('#1B5E20');
@@ -37,7 +39,7 @@ export default function ClubSetupScreen() {
   async function pickImage() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission needed', 'Please allow access to your photos.');
+      Alert.alert(t('club.permissionNeeded'), t('club.photoPermission'));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -53,7 +55,7 @@ export default function ClubSetupScreen() {
 
   function handleCreate() {
     if (!name.trim()) {
-      Alert.alert('Club Name', 'Please enter a club name.');
+      Alert.alert(t('club.nameLabel'), t('club.errorNoName'));
       return;
     }
     setClub({
@@ -81,14 +83,12 @@ export default function ClubSetupScreen() {
         ]}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.title}>Create Your Club</Text>
-        <Text style={styles.subtitle}>
-          Set up your football identity for the season ahead
-        </Text>
+        <Text style={styles.title}>{t('club.title')}</Text>
+        <Text style={styles.subtitle}>{t('club.subtitle')}</Text>
 
         {step === 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Club Name</Text>
+            <Text style={styles.sectionTitle}>{t('club.nameLabel')}</Text>
             <View style={styles.inputWrapper}>
               <Ionicons
                 name="shield-outline"
@@ -98,7 +98,7 @@ export default function ClubSetupScreen() {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Enter club name"
+                placeholder={t('club.namePlaceholder')}
                 placeholderTextColor="#9E9E9E"
                 value={name}
                 onChangeText={setName}
@@ -107,7 +107,7 @@ export default function ClubSetupScreen() {
             </View>
 
             <Text style={[styles.sectionTitle, { marginTop: 24 }]}>
-              Club Badge (Optional)
+              {t('club.badgeLabel')}
             </Text>
             <Pressable
               onPress={pickImage}
@@ -121,7 +121,7 @@ export default function ClubSetupScreen() {
               ) : (
                 <View style={styles.badgePlaceholder}>
                   <Ionicons name="camera-outline" size={32} color="#9E9E9E" />
-                  <Text style={styles.badgeText}>Tap to select</Text>
+                  <Text style={styles.badgeText}>{t('club.tapToSelect')}</Text>
                 </View>
               )}
             </Pressable>
@@ -129,7 +129,7 @@ export default function ClubSetupScreen() {
             <Pressable
               onPress={() => {
                 if (!name.trim()) {
-                  Alert.alert('Club Name', 'Please enter a club name.');
+                  Alert.alert(t('club.nameLabel'), t('club.errorNoName'));
                   return;
                 }
                 setStep(1);
@@ -143,7 +143,7 @@ export default function ClubSetupScreen() {
                 },
               ]}
             >
-              <Text style={styles.nextBtnText}>Choose Colors</Text>
+              <Text style={styles.nextBtnText}>{t('club.chooseColors')}</Text>
               <Ionicons name="arrow-forward" size={20} color="#FFF" />
             </Pressable>
           </View>
@@ -151,10 +151,8 @@ export default function ClubSetupScreen() {
 
         {step === 1 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Primary Color</Text>
-            <Text style={styles.sectionHint}>
-              Used for headers, buttons and main elements
-            </Text>
+            <Text style={styles.sectionTitle}>{t('club.primaryColor')}</Text>
+            <Text style={styles.sectionHint}>{t('club.primaryColorHint')}</Text>
             <ColorPicker
               selectedColor={primaryColor}
               onSelect={(c) => {
@@ -164,11 +162,9 @@ export default function ClubSetupScreen() {
             />
 
             <Text style={[styles.sectionTitle, { marginTop: 28 }]}>
-              Secondary Color
+              {t('club.secondaryColor')}
             </Text>
-            <Text style={styles.sectionHint}>
-              Used for accents, stars and highlights
-            </Text>
+            <Text style={styles.sectionHint}>{t('club.secondaryColorHint')}</Text>
             <ColorPicker
               selectedColor={secondaryColor}
               onSelect={(c) => {
@@ -187,7 +183,7 @@ export default function ClubSetupScreen() {
                     { color: getLuminance(primaryColor) > 0.4 ? '#000' : '#FFF' },
                   ]}
                 >
-                  Primary
+                  {t('club.primary')}
                 </Text>
               </View>
               <View
@@ -205,7 +201,7 @@ export default function ClubSetupScreen() {
                     },
                   ]}
                 >
-                  Secondary
+                  {t('club.secondary')}
                 </Text>
               </View>
             </View>
@@ -219,7 +215,7 @@ export default function ClubSetupScreen() {
                 ]}
               >
                 <Ionicons name="arrow-back" size={20} color="#1B5E20" />
-                <Text style={styles.backBtnText}>Back</Text>
+                <Text style={styles.backBtnText}>{t('club.back')}</Text>
               </Pressable>
 
               <Pressable
@@ -242,7 +238,7 @@ export default function ClubSetupScreen() {
                     },
                   ]}
                 >
-                  Start Season
+                  {t('club.startSeason')}
                 </Text>
                 <Ionicons
                   name="football"

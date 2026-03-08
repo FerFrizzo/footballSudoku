@@ -12,6 +12,7 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/src/theme/ThemeProvider';
 import { useGameStore } from '@/src/state/gameStore';
@@ -31,6 +32,7 @@ export default function DivisionScreen() {
   const { divisionId } = useLocalSearchParams<{ divisionId: string }>();
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabType>('matchdays');
 
   const division = DIVISIONS.find((d) => d.id === divisionId);
@@ -60,7 +62,7 @@ export default function DivisionScreen() {
   if (!division) {
     return (
       <View style={[styles.center, { backgroundColor: theme.background }]}>
-        <Text style={{ color: theme.text }}>Division not found</Text>
+        <Text style={{ color: theme.text }}>{t('division.divisionNotFound')}</Text>
       </View>
     );
   }
@@ -130,7 +132,7 @@ export default function DivisionScreen() {
             styles.tabText,
             { color: activeTab === 'matchdays' ? theme.primary : theme.textSecondary },
           ]}>
-            Matchdays
+            {t('division.matchdays')}
           </Text>
         </Pressable>
         <Pressable
@@ -144,7 +146,7 @@ export default function DivisionScreen() {
             styles.tabText,
             { color: activeTab === 'table' ? theme.primary : theme.textSecondary },
           ]}>
-            League Table
+            {t('division.leagueTable')}
           </Text>
         </Pressable>
       </View>
@@ -208,7 +210,7 @@ export default function DivisionScreen() {
                       styles.matchdayLabel,
                       { color: unlocked ? theme.text : '#BDBDBD' },
                     ]}>
-                      Matchday {matchdayIndex + 1}
+                      {t('division.matchday')} {matchdayIndex + 1}
                     </Text>
 
                     {isCompleted && (
@@ -233,7 +235,7 @@ export default function DivisionScreen() {
 
                     {!isCompleted && unlocked && (
                       <Text style={[styles.readyText, { color: theme.textSecondary }]}>
-                        Ready to play
+                        {t('division.readyToPlay')}
                       </Text>
                     )}
                   </View>
@@ -280,7 +282,7 @@ export default function DivisionScreen() {
         >
           <View style={[styles.tableHeader, { backgroundColor: theme.surfaceAlt }]}>
             <Text style={[styles.thPos, { color: theme.textSecondary }]}>#</Text>
-            <Text style={[styles.thTeam, { color: theme.textSecondary }]}>Team</Text>
+            <Text style={[styles.thTeam, { color: theme.textSecondary }]}>{t('division.team')}</Text>
             <Text style={[styles.thStat, { color: theme.textSecondary }]}>P</Text>
             <Text style={[styles.thStat, { color: theme.textSecondary }]}>W</Text>
             <Text style={[styles.thStat, { color: theme.textSecondary }]}>D</Text>
@@ -347,13 +349,13 @@ export default function DivisionScreen() {
             <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: '#E8F5E9' }]} />
               <Text style={[styles.legendText, { color: theme.textSecondary }]}>
-                Promotion (Top 3)
+                {t('division.promotionTop3')}
               </Text>
             </View>
             <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: '#FFEBEE' }]} />
               <Text style={[styles.legendText, { color: theme.textSecondary }]}>
-                Drop Zone (Bottom 3)
+                {t('division.dropZoneBottom3')}
               </Text>
             </View>
           </View>

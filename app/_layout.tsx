@@ -19,6 +19,7 @@ import { ThemeProvider } from '@/src/theme/ThemeProvider';
 import { useGameStore } from '@/src/state/gameStore';
 import { supabase, isSupabaseConfigured } from '@/src/services/supabase';
 import { trackEvent, flushQueue } from '@/src/services/analytics';
+import '@/src/i18n';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -87,7 +88,7 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
@@ -118,15 +119,15 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (fontsLoaded && sessionChecked) {
+    if ((fontsLoaded || fontError) && sessionChecked) {
       SplashScreen.hideAsync();
       const deviceId = useGameStore.getState().deviceId;
       trackEvent('app_open', {}, useGameStore.getState().supabaseUserId, deviceId);
       flushQueue();
     }
-  }, [fontsLoaded, sessionChecked]);
+  }, [fontsLoaded, fontError, sessionChecked]);
 
-  if (!fontsLoaded || !sessionChecked) {
+  if ((!fontsLoaded && !fontError) || !sessionChecked) {
     return (
       <View style={styles.loading}>
         <ActivityIndicator size="large" color="#1B5E20" />

@@ -89,6 +89,14 @@ server/
 - `EXPO_PUBLIC_SUPABASE_ANON_KEY` - Supabase anon key
 - `SESSION_SECRET` - Express session secret
 
+## Internationalisation (i18n)
+- 7 supported languages: English (en), Portuguese Brazil (pt-BR), Italian (it), Spanish (es), French (fr), German (de), Polish (pl)
+- Translation files: `src/i18n/locales/` (one file per language)
+- i18next + react-i18next, bootstrapped in `app/_layout.tsx` via `import '@/src/i18n'`
+- Language stored in Zustand `language` field, persisted via AsyncStorage, synced to i18next on rehydrate
+- Language switcher in Settings tab: flag emoji + native name buttons
+- Division names (Elite, Crown, etc.) are proper nouns — NOT translated
+
 ## Key Packages
 - expo, expo-router, expo-crypto, expo-haptics, expo-image-picker
 - zustand, @tanstack/react-query

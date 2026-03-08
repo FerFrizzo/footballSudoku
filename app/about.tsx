@@ -10,12 +10,14 @@ import {
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/src/theme/ThemeProvider';
 
 export default function AboutScreen() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const { t } = useTranslation();
 
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
   const webBottomInset = Platform.OS === 'web' ? 34 : 0;
@@ -45,7 +47,7 @@ export default function AboutScreen() {
           />
         </Pressable>
         <Text style={[styles.headerTitle, { color: theme.textOnPrimary }]}>
-          About
+          {t('about.title')}
         </Text>
         <View style={styles.backBtn} />
       </View>
@@ -65,43 +67,43 @@ export default function AboutScreen() {
             Story Mode Sudoku
           </Text>
           <Text style={[styles.version, { color: theme.textSecondary }]}>
-            Version 1.0.0
+            {t('about.version')}
           </Text>
         </View>
 
         <View style={[styles.card, { backgroundColor: theme.surface }]}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            Legal Disclaimer
+            {t('about.legalDisclaimerTitle')}
           </Text>
           <Text style={[styles.bodyText, { color: theme.textSecondary }]}>
-            This game is set in a fictional football universe inspired by classic promotion-based leagues.
+            {t('about.legalDisclaimer1')}
           </Text>
           <Text style={[styles.bodyText, { color: theme.textSecondary }]}>
-            All divisions, clubs, regions, stadiums, and other elements are entirely fictional. No association with any real football organizations, leagues, clubs, or governing bodies is intended or implied.
+            {t('about.legalDisclaimer2')}
           </Text>
           <Text style={[styles.bodyText, { color: theme.textSecondary }]}>
-            Any resemblance to real entities is purely coincidental.
+            {t('about.legalDisclaimer3')}
           </Text>
         </View>
 
         <View style={[styles.card, { backgroundColor: theme.surface }]}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            The Game
+            {t('about.gameTitle')}
           </Text>
           <Text style={[styles.bodyText, { color: theme.textSecondary }]}>
-            Rise through a 10-division football pyramid by solving Sudoku puzzles. Each matchday is a puzzle, and your performance determines your match result.
+            {t('about.game1')}
           </Text>
           <Text style={[styles.bodyText, { color: theme.textSecondary }]}>
-            Earn 3 stars to win, 2 for a draw, and 1 for a loss. Finish in the top 3 of your league table to earn promotion to the next division.
+            {t('about.game2')}
           </Text>
         </View>
 
         <View style={[styles.card, { backgroundColor: theme.surface }]}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            Fictional Regions
+            {t('about.regionsTitle')}
           </Text>
           <Text style={[styles.bodyText, { color: theme.textSecondary }]}>
-            The game world spans five fictional regions: Northern Coast, Midlands Plains, Southern Vale, Eastern Ridge, and Western Harbors. All locations are entirely made up.
+            {t('about.regions1')}
           </Text>
         </View>
       </ScrollView>

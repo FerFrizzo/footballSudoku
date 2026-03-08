@@ -12,6 +12,7 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/src/theme/ThemeProvider';
 import { useGameStore } from '@/src/state/gameStore';
@@ -54,6 +55,7 @@ export default function MatchdayScreen() {
   }>();
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const { t } = useTranslation();
 
   const matchdayIndex = parseInt(matchdayId || '0', 10);
   const division = DIVISIONS.find((d) => d.id === divisionId);
@@ -329,13 +331,16 @@ export default function MatchdayScreen() {
       } else if (gems >= HINT_COST_GEMS) {
         const spent = spendGems(HINT_COST_GEMS);
         if (!spent) {
-          Alert.alert('Not enough gems', `You need ${HINT_COST_GEMS} gems for a hint.`);
+          Alert.alert(
+            t('game.notEnoughGemsTitle'),
+            t('game.notEnoughGemsMessage', { cost: HINT_COST_GEMS })
+          );
           return;
         }
       } else {
         Alert.alert(
-          'No hints available',
-          `Buy a hint for ${HINT_COST_GEMS} gems or upgrade to Premium.`
+          t('game.noHintsTitle'),
+          t('game.noHintsMessage', { cost: HINT_COST_GEMS })
         );
         return;
       }
@@ -410,21 +415,25 @@ export default function MatchdayScreen() {
       pathname: '/dialogue',
       params: {
         message: dialogue,
-        speaker: 'Manager',
+        speaker: t('dialogue.manager'),
         type: 'completion',
       },
     });
   }
 
   function handleQuit() {
-    Alert.alert('Quit Matchday', 'Your progress on this puzzle will be lost.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Quit',
-        style: 'destructive',
-        onPress: () => router.back(),
-      },
-    ]);
+    Alert.alert(
+      t('game.quitTitle'),
+      t('game.quitMessage'),
+      [
+        { text: t('game.cancel'), style: 'cancel' },
+        {
+          text: t('game.quit'),
+          style: 'destructive',
+          onPress: () => router.back(),
+        },
+      ]
+    );
   }
 
   const minutes = Math.floor(timer / 60);
@@ -441,7 +450,7 @@ export default function MatchdayScreen() {
       >
         <ActivityIndicator size="large" color={theme.primary} />
         <Text style={[styles.loadingText, { color: theme.textSecondary }]}>
-          Preparing puzzle...
+          {t('game.preparingPuzzle')}
         </Text>
       </View>
     );
@@ -470,7 +479,7 @@ export default function MatchdayScreen() {
 
         <View style={styles.headerCenter}>
           <Text style={[styles.levelLabel, { color: theme.textOnPrimary }]}>
-            {division?.name || 'Division'} - MD {matchdayIndex + 1}
+            {division?.name || 'Division'} - {t('game.md')} {matchdayIndex + 1}
           </Text>
           <View style={styles.timerRow}>
             <Ionicons

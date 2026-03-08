@@ -14,25 +14,30 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/src/theme/ThemeProvider';
 import { useGameStore } from '@/src/state/gameStore';
 import { IAPService } from '@/src/services/stubs';
 import { supabase, isSupabaseConfigured } from '@/src/services/supabase';
+import { SUPPORTED_LANGUAGES } from '@/src/i18n';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const { t } = useTranslation();
   const club = useGameStore((s) => s.club);
   const autoCheck = useGameStore((s) => s.autoCheck);
   const soundEnabled = useGameStore((s) => s.soundEnabled);
   const isPremium = useGameStore((s) => s.isPremium);
   const gems = useGameStore((s) => s.gems);
+  const language = useGameStore((s) => s.language);
   const setAutoCheck = useGameStore((s) => s.setAutoCheck);
   const setSoundEnabled = useGameStore((s) => s.setSoundEnabled);
   const setPremium = useGameStore((s) => s.setPremium);
   const resetProgress = useGameStore((s) => s.resetProgress);
   const logout = useGameStore((s) => s.logout);
+  const setLanguage = useGameStore((s) => s.setLanguage);
   const deviceId = useGameStore((s) => s.deviceId);
   const userId = useGameStore((s) => s.supabaseUserId);
   const getTotalStars = useGameStore((s) => s.getTotalStars);
@@ -48,10 +53,10 @@ export default function SettingsScreen() {
       if (success) {
         setPremium(true);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Alert.alert('Welcome to Premium!', 'Ads removed and extra hints unlocked.');
+        Alert.alert(t('settings.welcomePremium'), t('settings.premiumUnlocked'));
       }
     } catch {
-      Alert.alert('Error', 'Purchase failed. Please try again.');
+      Alert.alert(t('settings.error'), t('settings.purchaseFailed'));
     } finally {
       setPurchaseLoading(false);
     }
@@ -59,12 +64,12 @@ export default function SettingsScreen() {
 
   function handleReset() {
     Alert.alert(
-      'Reset Progress',
-      'This will erase all your stars, gems, league tables, and matchday progress. This cannot be undone.',
+      t('settings.resetTitle'),
+      t('settings.resetMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('settings.cancel'), style: 'cancel' },
         {
-          text: 'Reset',
+          text: t('settings.reset'),
           style: 'destructive',
           onPress: () => {
             resetProgress();
@@ -94,7 +99,7 @@ export default function SettingsScreen() {
         ]}
       >
         <Text style={[styles.headerTitle, { color: theme.textOnPrimary }]}>
-          Settings
+          {t('settings.title')}
         </Text>
       </View>
 
@@ -128,12 +133,12 @@ export default function SettingsScreen() {
             )}
             <View style={styles.clubInfo}>
               <Text style={[styles.clubName, { color: theme.text }]}>
-                {club?.name || 'My Club'}
+                {club?.name || t('home.myClub')}
               </Text>
               <View style={styles.clubStats}>
                 <Ionicons name="star" size={14} color={theme.starFilled} />
                 <Text style={[styles.clubStatText, { color: theme.textSecondary }]}>
-                  {getTotalStars()} stars
+                  {getTotalStars()} {t('settings.stars')}
                 </Text>
                 <Ionicons
                   name="diamond"
@@ -142,7 +147,7 @@ export default function SettingsScreen() {
                   style={{ marginLeft: 8 }}
                 />
                 <Text style={[styles.clubStatText, { color: theme.textSecondary }]}>
-                  {gems} gems
+                  {gems} {t('settings.gems')}
                 </Text>
               </View>
             </View>
@@ -185,12 +190,12 @@ export default function SettingsScreen() {
               <Text
                 style={[styles.premiumTitle, { color: theme.textOnSecondary }]}
               >
-                Go Premium
+                {t('settings.goPremium')}
               </Text>
               <Text
                 style={[styles.premiumSub, { color: theme.textOnSecondary }]}
               >
-                Remove ads and get unlimited hints
+                {t('settings.premiumSub')}
               </Text>
             </View>
             <Ionicons
@@ -207,14 +212,14 @@ export default function SettingsScreen() {
           >
             <Ionicons name="checkmark-circle" size={20} color={theme.primary} />
             <Text style={[styles.premiumBadgeText, { color: theme.primary }]}>
-              Premium Active
+              {t('settings.premiumActive')}
             </Text>
           </View>
         )}
 
         <View style={[styles.card, { backgroundColor: theme.surface }]}>
           <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>
-            Gameplay
+            {t('settings.gameplay')}
           </Text>
           <View style={styles.settingRow}>
             <View style={styles.settingLabel}>
@@ -224,7 +229,7 @@ export default function SettingsScreen() {
                 color={theme.text}
               />
               <Text style={[styles.settingText, { color: theme.text }]}>
-                Auto-check mistakes
+                {t('settings.autoCheck')}
               </Text>
             </View>
             <Switch
@@ -245,7 +250,7 @@ export default function SettingsScreen() {
                 color={theme.text}
               />
               <Text style={[styles.settingText, { color: theme.text }]}>
-                Sound effects
+                {t('settings.soundEffects')}
               </Text>
             </View>
             <Switch
@@ -261,7 +266,46 @@ export default function SettingsScreen() {
 
         <View style={[styles.card, { backgroundColor: theme.surface }]}>
           <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>
-            Account
+            {t('settings.language')}
+          </Text>
+          <View style={styles.languageGrid}>
+            {SUPPORTED_LANGUAGES.map((lang) => {
+              const isSelected = language === lang.code;
+              return (
+                <Pressable
+                  key={lang.code}
+                  onPress={() => {
+                    setLanguage(lang.code);
+                    Haptics.selectionAsync();
+                  }}
+                  style={({ pressed }) => [
+                    styles.langBtn,
+                    {
+                      backgroundColor: isSelected ? theme.primary : theme.background,
+                      borderColor: isSelected ? theme.primary : theme.border,
+                      opacity: pressed ? 0.8 : 1,
+                    },
+                  ]}
+                >
+                  <Text style={styles.langFlag}>{lang.flag}</Text>
+                  <Text
+                    style={[
+                      styles.langName,
+                      { color: isSelected ? theme.textOnPrimary : theme.text },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {lang.nativeName}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+
+        <View style={[styles.card, { backgroundColor: theme.surface }]}>
+          <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+            {t('settings.account')}
           </Text>
           <Pressable
             onPress={() => router.push('/about')}
@@ -277,7 +321,7 @@ export default function SettingsScreen() {
                 color={theme.text}
               />
               <Text style={[styles.settingText, { color: theme.text }]}>
-                About
+                {t('settings.about')}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} />
@@ -297,7 +341,7 @@ export default function SettingsScreen() {
                 color={theme.error}
               />
               <Text style={[styles.settingText, { color: theme.error }]}>
-                Reset all progress
+                {t('settings.resetProgress')}
               </Text>
             </View>
           </Pressable>
@@ -316,7 +360,7 @@ export default function SettingsScreen() {
                 color={theme.textSecondary}
               />
               <Text style={[styles.settingText, { color: theme.text }]}>
-                Sign out
+                {t('settings.signOut')}
               </Text>
             </View>
           </Pressable>
@@ -452,5 +496,29 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     marginVertical: 4,
+  },
+  languageGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 4,
+  },
+  langBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    minWidth: '30%',
+  },
+  langFlag: {
+    fontSize: 18,
+  },
+  langName: {
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
+    flex: 1,
   },
 });

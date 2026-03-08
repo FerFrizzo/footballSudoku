@@ -14,6 +14,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 
 import { supabase, isSupabaseConfigured } from '@/src/services/supabase';
 import { useGameStore } from '@/src/state/gameStore';
@@ -21,6 +22,7 @@ import { trackEvent } from '@/src/services/analytics';
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
@@ -34,12 +36,12 @@ export default function LoginScreen() {
 
   async function handleAuth() {
     if (!email.trim() || !password.trim()) {
-      setError('Please enter both email and password.');
+      setError(t('auth.errorEmailPassword'));
       return;
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
+      setError(t('auth.errorPasswordLength'));
       return;
     }
 
@@ -95,7 +97,7 @@ export default function LoginScreen() {
         }
       }
     } catch (e: any) {
-      setError(e.message || 'Authentication failed.');
+      setError(e.message || t('auth.errorFailed'));
       await trackEvent(
         'login_failure',
         { method: isSignUp ? 'signup' : 'signin', error: e.message },
@@ -126,10 +128,8 @@ export default function LoginScreen() {
           <View style={styles.iconCircle}>
             <Ionicons name="football" size={48} color="#1B5E20" />
           </View>
-          <Text style={styles.title}>Story Mode Sudoku</Text>
-          <Text style={styles.subtitle}>
-            Rise through the football pyramid
-          </Text>
+          <Text style={styles.title}>{t('auth.title')}</Text>
+          <Text style={styles.subtitle}>{t('auth.subtitle')}</Text>
         </View>
 
         <View style={styles.form}>
@@ -142,7 +142,7 @@ export default function LoginScreen() {
             />
             <TextInput
               style={styles.input}
-              placeholder="Email address"
+              placeholder={t('auth.email')}
               placeholderTextColor="#9E9E9E"
               value={email}
               onChangeText={setEmail}
@@ -161,7 +161,7 @@ export default function LoginScreen() {
             />
             <TextInput
               style={styles.input}
-              placeholder="Password"
+              placeholder={t('auth.password')}
               placeholderTextColor="#9E9E9E"
               value={password}
               onChangeText={setPassword}
@@ -174,9 +174,7 @@ export default function LoginScreen() {
           {!isSupabaseConfigured && (
             <View style={styles.devBanner}>
               <Ionicons name="information-circle" size={16} color="#0277BD" />
-              <Text style={styles.devText}>
-                Dev mode: Supabase not configured. Auth will be bypassed.
-              </Text>
+              <Text style={styles.devText}>{t('auth.devMode')}</Text>
             </View>
           )}
 
@@ -195,7 +193,7 @@ export default function LoginScreen() {
               <ActivityIndicator color="#FFF" />
             ) : (
               <Text style={styles.authBtnText}>
-                {isSignUp ? 'Create Account' : 'Sign In'}
+                {isSignUp ? t('auth.createAccount') : t('auth.signIn')}
               </Text>
             )}
           </Pressable>
@@ -208,9 +206,7 @@ export default function LoginScreen() {
             style={styles.toggleBtn}
           >
             <Text style={styles.toggleText}>
-              {isSignUp
-                ? 'Already have an account? Sign In'
-                : "Don't have an account? Sign Up"}
+              {isSignUp ? t('auth.alreadyHaveAccount') : t('auth.noAccount')}
             </Text>
           </Pressable>
         </View>

@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
 import { DIVISIONS, type ClubProfile, type MatchdayProgress, type DivisionLeague } from '../types';
 import { generateLeagueTeams, simulateAIResults } from '../utils/clubGenerator';
+import { changeLanguage, type LanguageCode } from '../i18n';
 
 function seededRandom(seed: number): () => number {
   let s = seed % 2147483647;
@@ -25,10 +26,12 @@ interface GameState {
   soundEnabled: boolean;
   isPremium: boolean;
   freeHintsUsed: Record<string, boolean>;
+  language: string;
   _hasHydrated: boolean;
 
   setAuthenticated: (v: boolean, userId?: string | null) => void;
   setClub: (club: ClubProfile) => void;
+  setLanguage: (code: string) => void;
   initDivision: (divisionId: string) => void;
   completeMatchday: (
     divisionId: string,
@@ -67,12 +70,18 @@ export const useGameStore = create<GameState>()(
       soundEnabled: true,
       isPremium: false,
       freeHintsUsed: {},
+      language: 'en',
       _hasHydrated: false,
 
       setAuthenticated: (v, userId) =>
         set({ isAuthenticated: v, supabaseUserId: userId || null }),
 
       setClub: (club) => set({ club }),
+
+      setLanguage: (code) => {
+        set({ language: code });
+        changeLanguage(code);
+      },
 
       initDivision: (divisionId) => {
         const state = get();
@@ -313,10 +322,14 @@ export const useGameStore = create<GameState>()(
         soundEnabled: state.soundEnabled,
         isPremium: state.isPremium,
         freeHintsUsed: state.freeHintsUsed,
+        language: state.language,
       }),
       onRehydrateStorage: () => {
-        return () => {
+        return (state) => {
           useGameStore.setState({ _hasHydrated: true });
+          if (state?.language) {
+            changeLanguage(state.language);
+          }
         };
       },
     }

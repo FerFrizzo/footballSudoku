@@ -9,6 +9,7 @@ import {
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/src/theme/ThemeProvider';
 
@@ -20,6 +21,7 @@ export default function DialogueScreen() {
   }>();
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const { t } = useTranslation();
 
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
   const webBottomInset = Platform.OS === 'web' ? 34 : 0;
@@ -64,7 +66,7 @@ export default function DialogueScreen() {
             },
           ]}
         >
-          {speaker || (isPromotion ? 'The Board' : 'Manager')}
+          {speaker || (isPromotion ? t('dialogue.theBoard') : t('dialogue.manager'))}
         </Text>
 
         <Text
@@ -75,7 +77,7 @@ export default function DialogueScreen() {
             },
           ]}
         >
-          {message || 'Well played today.'}
+          {message || t('dialogue.defaultMessage')}
         </Text>
       </View>
 
@@ -100,7 +102,7 @@ export default function DialogueScreen() {
             },
           ]}
         >
-          Continue
+          {t('dialogue.continue')}
         </Text>
         <Ionicons
           name="arrow-forward"

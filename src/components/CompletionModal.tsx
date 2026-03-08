@@ -8,6 +8,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeProvider';
 
 interface CompletionModalProps {
@@ -48,6 +49,7 @@ export default function CompletionModal({
   onContinue,
 }: CompletionModalProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const resultCfg = RESULT_CONFIG[matchResult];
 
   return (
@@ -62,10 +64,10 @@ export default function CompletionModal({
           </View>
 
           <Text style={[styles.title, { color: theme.text }]}>
-            {matchResult === 'loss' ? 'Matchday Over' : 'Matchday Complete!'}
+            {matchResult === 'loss' ? t('completion.matchdayOver') : t('completion.matchdayComplete')}
           </Text>
           <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-            {matchResult === 'loss' ? 'Too many mistakes' : divisionName}
+            {matchResult === 'loss' ? t('completion.tooManyMistakes') : divisionName}
           </Text>
 
           <View style={styles.starsRow}>
@@ -82,25 +84,25 @@ export default function CompletionModal({
           <View style={styles.statsGrid}>
             <StatItem
               icon="time-outline"
-              label="Time"
+              label={t('completion.time')}
               value={formatTime(timeSec)}
               theme={theme}
             />
             <StatItem
               icon="close-circle-outline"
-              label="Mistakes"
+              label={t('completion.mistakes')}
               value={String(mistakes)}
               theme={theme}
             />
             <StatItem
               icon="bulb-outline"
-              label="Hints"
+              label={t('completion.hints')}
               value={String(hintsUsed)}
               theme={theme}
             />
             <StatItem
               icon="diamond-outline"
-              label="Gems"
+              label={t('completion.gems')}
               value={`+${gemsEarned}`}
               theme={theme}
               valueColor={theme.secondary}
@@ -119,7 +121,7 @@ export default function CompletionModal({
             ]}
           >
             <Text style={[styles.continueText, { color: theme.textOnPrimary }]}>
-              Continue
+              {t('completion.continue')}
             </Text>
           </Pressable>
         </View>

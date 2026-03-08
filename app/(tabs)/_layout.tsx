@@ -5,18 +5,20 @@ import { BlurView } from 'expo-blur';
 import { Platform, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/src/theme/ThemeProvider';
 
 function NativeTabLayout() {
+  const { t } = useTranslation();
   return (
     <NativeTabs>
       <NativeTabs.Trigger name="index">
         <Icon sf={{ default: 'map', selected: 'map.fill' }} />
-        <Label>Season</Label>
+        <Label>{t('tabs.season')}</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="settings">
         <Icon sf={{ default: 'gearshape', selected: 'gearshape.fill' }} />
-        <Label>Settings</Label>
+        <Label>{t('tabs.settings')}</Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );
@@ -24,6 +26,7 @@ function NativeTabLayout() {
 
 function ClassicTabLayout() {
   const theme = useTheme();
+  const { t } = useTranslation();
   const isWeb = Platform.OS === 'web';
   const isIOS = Platform.OS === 'ios';
 
@@ -65,7 +68,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Season',
+          title: t('tabs.season'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="map-outline" size={size} color={color} />
           ),
@@ -74,7 +77,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
+          title: t('tabs.settings'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings-outline" size={size} color={color} />
           ),
