@@ -3,43 +3,54 @@
 A freemium "Story Mode Sudoku" game set in a fully fictional football pyramid universe. Built with React Native (Expo) + TypeScript.
 
 ## Legal / IP
-All content is fictional. No real leagues, clubs, cities, stadiums, or logos are referenced. See the About screen for the full disclaimer.
+All content is entirely fictional. No real leagues, clubs, cities, stadiums, or logos are referenced anywhere in the app. The About screen displays the full legal disclaimer. The procedural club name generator (`src/utils/clubGenerator.ts`) uses invented word-part combinations only — no real place names.
 
 ## Architecture
 - **Frontend**: Expo (React Native) with expo-router for file-based routing
-- **Backend**: Express server on port 5000 (APIs + landing page)
-- **State**: Zustand with AsyncStorage persistence (local-only progress)
-- **Auth**: Supabase (with dev bypass when not configured)
-- **Analytics**: Queue to Supabase, offline-first
-- **Ads/IAP**: Stubs in src/services/stubs.ts
+- **Backend**: Express server on port 5000 (APIs + static landing page)
+- **State**: Zustand with AsyncStorage persistence (fully local — no server sync needed)
+- **Auth**: Supabase (dev bypass active when env vars not set)
+- **Analytics**: Offline queue flushed to Supabase `analytics_events` table
+- **IAP**: RevenueCat — fully integrated, entitlement `premium`, $2.99/month
 
-## 10-Division Fictional Pyramid (Top to Bottom)
-1. Elite Division (T1) - 22-25 clues
-2. Crown Division (T2) - 26-28 clues
-3. Champion Division (T3) - 29-31 clues
-4. National Division (T4) - 32-34 clues
-5. Federation Division (T5) - 35-37 clues
-6. Regional Division (T6) - 38-40 clues
-7. County Division (T7) - 41-43 clues
-8. Borough Division (T8) - 44-46 clues
-9. Township Division (T9) - 47-49 clues
-10. Grassroots Division (T10) - 50-52 clues
+## 10-Division Fictional Pyramid (Top → Bottom)
+| Tier | Division | Clue Range |
+|------|----------|-----------|
+| T1 | Elite Division | 22–25 |
+| T2 | Crown Division | 26–28 |
+| T3 | Champion Division | 29–31 |
+| T4 | National Division | 32–34 |
+| T5 | Federation Division | 35–37 |
+| T6 | Regional Division | 38–40 |
+| T7 | County Division | 41–43 |
+| T8 | Borough Division | 44–46 |
+| T9 | Township Division | 47–49 |
+| T10 | Grassroots Division | 50–52 |
 
-Each division: 20 matchdays, 20 teams (1 user + 19 AI procedural)
+Each division: 20 matchdays, 20 teams (1 user + 19 AI procedural).
 
-## League Table
-- 3 stars = Win (3pts), 2 stars = Draw (1pt), 1 star = Loss (0pts)
-- Top 3 promote, Bottom 3 in "Drop Zone"
-- AI results simulated with weighted randomness
+## League Table & Scoring
+- 3 stars → Win (+3 pts), 2 stars → Draw (+1 pt), 1 star → Draw (+1 pt), 0 stars → Loss (+0 pts)
+- Top 3 of 20 earn **promotion** after all 20 matchdays
+- Bottom 3 are in the **Drop Zone** (relegation warning)
+- AI team results simulated each matchday with seeded, weighted randomness
+- Grassroots (T10) is always unlocked; higher divisions unlock on promotion
+
+## Matchday Flow
+1. Player selects division → `app/division/[divisionId].tsx` (Matchdays tab + League Table tab)
+2. Player taps a matchday → `app/matchday/[divisionId]/[matchdayId].tsx` (Sudoku game)
+3. On puzzle complete → `CompletionModal` shows stars, result badge (WIN/DRAW/LOSS), gems earned
+4. CompletionModal → `app/dialogue.tsx` modal with manager/board dialogue
+5. Dialogue dismissed → returns to division screen (league table updates)
 
 ## File Structure
 ```
 app/
-  _layout.tsx              # Root layout with providers + auth gate
+  _layout.tsx              # Root layout: providers, auth gate, RevenueCat init
   +native-intent.tsx       # Deep link handler
   +not-found.tsx           # 404 screen
-  dialogue.tsx             # Post-matchday dialogue modal
-  about.tsx                # Legal disclaimer screen
+  dialogue.tsx             # Post-matchday dialogue modal (promotion/regular)
+  about.tsx                # Legal disclaimer + game info screen
   (auth)/
     _layout.tsx
     login.tsx              # Login/signup with Supabase
@@ -48,84 +59,97 @@ app/
     club.tsx               # Club creation (name, badge, colors)
   (tabs)/
     _layout.tsx            # Tab navigation (Season + Settings)
-    index.tsx              # Pyramid map (10 divisions)
-    settings.tsx           # Settings + About link
+    index.tsx              # Pyramid map (10 divisions, bottom→top visual order)
+    settings.tsx           # Settings, premium IAP, language, About link
   division/
-    [divisionId].tsx       # Season dashboard + league table
+    [divisionId].tsx       # Season dashboard: Matchdays tab + League Table tab
   matchday/
     [divisionId]/
       [matchdayId].tsx     # Sudoku game screen
 
 src/
-  types.ts                 # All types, division configs, constants
+  types.ts                 # All interfaces, DIVISIONS array, dialogue arrays, constants
   state/
-    gameStore.ts           # Zustand store with league progress
+    gameStore.ts           # Zustand store: leagueProgress, initDivision, completeMatchday
   sudoku/
-    engine.ts              # Puzzle generator/solver
+    engine.ts              # Puzzle generator/solver, calculateStars, calculateGems
   services/
-    supabase.ts            # Supabase client
-    analytics.ts           # Analytics queue
-    stubs.ts               # Ads/IAP stubs
+    supabase.ts            # Supabase client (optional)
+    analytics.ts           # Analytics event queue
+    stubs.ts               # Ads stub (AdsService)
   components/
-    SudokuGrid.tsx         # 9x9 grid component
-    NumberPad.tsx           # Number input pad
-    CompletionModal.tsx    # End-of-matchday modal with result
+    SudokuGrid.tsx         # 9×9 grid with conflict highlighting
+    NumberPad.tsx          # Number input pad + notes/undo/erase/hint controls
+    CompletionModal.tsx    # End-of-matchday modal: stars, WIN/DRAW/LOSS badge, gems
     ColorPicker.tsx        # Club color picker
+    ErrorBoundary.tsx      # App crash recovery
   theme/
-    ThemeProvider.tsx       # Theme context using club colors
+    ThemeProvider.tsx      # Theme context driven by club primary/secondary colors
   utils/
-    clubGenerator.ts       # Procedural fictional club names
+    clubGenerator.ts       # Procedural fictional club names (seeded RNG)
+  lib/
+    revenuecat.tsx         # SubscriptionProvider + useSubscription hook (RevenueCat)
+  i18n/
+    index.ts               # i18next bootstrap
+    locales/               # en, pt-BR, it, es, fr, de, pl
 
 server/
   index.ts                 # Express server
   routes.ts                # API routes
-  storage.ts               # Server storage
+  storage.ts               # Server storage helpers
   templates/
-    landing-page.html      # Static landing page
+    landing-page.html      # Static landing page served at /
+
+scripts/
+  seedRevenueCat.ts        # One-time RevenueCat product/entitlement setup
 ```
 
-## In-App Purchases (IAP)
-
-IAP is currently stubbed in `src/services/stubs.ts` — `IAPService.purchasePremium()` always returns `true`. To wire up real payments with RevenueCat:
-
-1. Connect the RevenueCat integration in Replit (Settings → Integrations → RevenueCat)
-2. Run the seed script: `npx tsx scripts/seedRevenueCat.ts`
-3. Save the printed API keys to env vars:
-   - `EXPO_PUBLIC_REVENUECAT_TEST_API_KEY`
-   - `EXPO_PUBLIC_REVENUECAT_IOS_API_KEY`
-   - `EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY`
-   - `REVENUECAT_PROJECT_ID`, `REVENUECAT_TEST_STORE_APP_ID`, etc.
-4. Create `src/lib/revenuecat.tsx` from the template in `.local/skills/revenuecat/references/initial-setup.md`
-5. Initialize RevenueCat in `app/_layout.tsx` and wrap the app in `<SubscriptionProvider>`
-6. Replace `IAPService.purchasePremium()` in `app/(tabs)/settings.tsx` with `useSubscription().purchase()`
+## In-App Purchases (RevenueCat — LIVE)
+- **Entitlement**: `premium`
+- **Package**: `$rc_monthly`
+- **Product**: `premium_monthly` — $2.99/month
+- **Integration**: Replit RevenueCat integration connected (project `proj85e7ca90`)
+- **Hook**: `useSubscription()` from `src/lib/revenuecat.tsx` → `isSubscribed`, `purchase(pkg)`, `priceString`
+- **Premium features**: unlimited hints, no ads
+- In dev/Expo Go/web: SDK runs in Preview API Mode automatically (no real charges)
 
 ## Environment Variables
-- `EXPO_PUBLIC_SUPABASE_URL` - Supabase project URL
-- `EXPO_PUBLIC_SUPABASE_ANON_KEY` - Supabase anon key
-- `SESSION_SECRET` - Express session secret
+| Variable | Purpose |
+|----------|---------|
+| `EXPO_PUBLIC_REVENUECAT_TEST_API_KEY` | RevenueCat test store key |
+| `EXPO_PUBLIC_REVENUECAT_IOS_API_KEY` | RevenueCat iOS production key |
+| `EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY` | RevenueCat Android production key |
+| `EXPO_PUBLIC_REVENUECAT_PROJECT_ID` | RevenueCat project ID |
+| `EXPO_PUBLIC_REVENUECAT_TEST_STORE_APP_ID` | Test store app ID |
+| `EXPO_PUBLIC_SUPABASE_URL` | Supabase project URL (optional) |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key (optional) |
+| `SESSION_SECRET` | Express session secret |
 
 ## Internationalisation (i18n)
-- 7 supported languages: English (en), Portuguese Brazil (pt-BR), Italian (it), Spanish (es), French (fr), German (de), Polish (pl)
-- Translation files: `src/i18n/locales/` (one file per language)
-- i18next + react-i18next, bootstrapped in `app/_layout.tsx` via `import '@/src/i18n'`
-- Language stored in Zustand `language` field, persisted via AsyncStorage, synced to i18next on rehydrate
+- 7 languages: English (`en`), Portuguese Brazil (`pt-BR`), Italian (`it`), Spanish (`es`), French (`fr`), German (`de`), Polish (`pl`)
+- Translation files: `src/i18n/locales/` — one TypeScript file per language
+- i18next + react-i18next; bootstrapped via `import '@/src/i18n'` in `_layout.tsx`
+- Active language stored in Zustand `language` field, persisted via AsyncStorage, synced to i18next on rehydrate
 - Language switcher in Settings tab: flag emoji + native name buttons
 - Division names (Elite, Crown, etc.) are proper nouns — NOT translated
 
 ## Key Packages
-- expo, expo-router, expo-crypto, expo-haptics, expo-image-picker
-- zustand, @tanstack/react-query
-- @react-native-async-storage/async-storage
-- @react-native-community/netinfo
-- @supabase/supabase-js
-- @expo/vector-icons (Ionicons)
-- Inter font family (@expo-google-fonts/inter)
+- `expo`, `expo-router`, `expo-crypto`, `expo-haptics`, `expo-image-picker`
+- `zustand`, `@tanstack/react-query`
+- `@react-native-async-storage/async-storage`
+- `react-native-purchases` (RevenueCat)
+- `@supabase/supabase-js`
+- `@expo/vector-icons` (Ionicons)
+- `@expo-google-fonts/inter` (Inter 400/500/600/700)
+- `react-native-keyboard-controller`, `react-native-gesture-handler`
+- `react-native-safe-area-context`, `react-native-reanimated`
+- `i18next`, `react-i18next`
 
 ## Running
-- Frontend: `npm run expo:dev` (port 8081)
-- Backend: `npm run server:dev` (port 5000)
+- Frontend: `npm run expo:dev` → port 8081
+- Backend: `npm run server:dev` → port 5000
 
-## Supabase SQL
+## Supabase Analytics Table
 ```sql
 CREATE TABLE analytics_events (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -136,3 +160,12 @@ CREATE TABLE analytics_events (
   created_at timestamptz DEFAULT now()
 );
 ```
+
+## Analytics Events Tracked
+| Event | When |
+|-------|------|
+| `app_open` | App launch |
+| `matchday_start` | Puzzle begins |
+| `matchday_complete` | Puzzle solved (includes result, stars, time) |
+| `league_table_viewed` | League Table tab opened |
+| `hint_used` | Hint button pressed |

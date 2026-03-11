@@ -19,9 +19,11 @@ import { ThemeProvider } from '@/src/theme/ThemeProvider';
 import { useGameStore } from '@/src/state/gameStore';
 import { supabase, isSupabaseConfigured } from '@/src/services/supabase';
 import { trackEvent, flushQueue } from '@/src/services/analytics';
+import { initializeRevenueCat, SubscriptionProvider } from '@/src/lib/revenuecat';
 import '@/src/i18n';
 
 SplashScreen.preventAutoHideAsync();
+initializeRevenueCat();
 
 function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -138,15 +140,17 @@ export default function RootLayout() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <GestureHandlerRootView>
-          <KeyboardProvider>
-            <ThemeProvider>
-              <AuthGate>
-                <RootLayoutNav />
-              </AuthGate>
-            </ThemeProvider>
-          </KeyboardProvider>
-        </GestureHandlerRootView>
+        <SubscriptionProvider>
+          <GestureHandlerRootView>
+            <KeyboardProvider>
+              <ThemeProvider>
+                <AuthGate>
+                  <RootLayoutNav />
+                </AuthGate>
+              </ThemeProvider>
+            </KeyboardProvider>
+          </GestureHandlerRootView>
+        </SubscriptionProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

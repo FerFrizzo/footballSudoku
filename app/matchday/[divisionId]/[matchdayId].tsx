@@ -5,7 +5,6 @@ import {
   Pressable,
   StyleSheet,
   Alert,
-  Platform,
   ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
@@ -16,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/src/theme/ThemeProvider';
 import { useGameStore } from '@/src/state/gameStore';
+import { useSubscription } from '@/src/lib/revenuecat';
 import { DIVISIONS, WIN_DIALOGUES, DRAW_DIALOGUES, LOSS_DIALOGUES, HINT_COST_GEMS, FREE_HINTS_PER_LEVEL, PREMIUM_HINTS_PER_LEVEL } from '@/src/types';
 import {
   generatePuzzle,
@@ -62,8 +62,10 @@ export default function MatchdayScreen() {
   const divisionTier = division?.tier || 10;
 
   const autoCheck = useGameStore((s) => s.autoCheck);
-  const isPremium = useGameStore((s) => s.isPremium);
+  const isPremiumStore = useGameStore((s) => s.isPremium);
   const gems = useGameStore((s) => s.gems);
+  const { isSubscribed } = useSubscription();
+  const isPremium = isPremiumStore || isSubscribed;
   const completeMatchday = useGameStore((s) => s.completeMatchday);
   const spendGems = useGameStore((s) => s.spendGems);
   const hasFreeHint = useGameStore((s) => s.hasFreeHint);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/src/theme/ThemeProvider';
 import { useGameStore } from '@/src/state/gameStore';
-import { IAPService } from '@/src/services/stubs';
+import { useSubscription } from '@/src/lib/revenuecat';
 import { supabase, isSupabaseConfigured } from '@/src/services/supabase';
 import { SUPPORTED_LANGUAGES } from '@/src/i18n';
 
@@ -28,7 +28,6 @@ export default function SettingsScreen() {
   const club = useGameStore((s) => s.club);
   const autoCheck = useGameStore((s) => s.autoCheck);
   const soundEnabled = useGameStore((s) => s.soundEnabled);
-  const isPremium = useGameStore((s) => s.isPremium);
   const gems = useGameStore((s) => s.gems);
   const language = useGameStore((s) => s.language);
   const setAutoCheck = useGameStore((s) => s.setAutoCheck);
@@ -37,25 +36,28 @@ export default function SettingsScreen() {
   const resetProgress = useGameStore((s) => s.resetProgress);
   const logout = useGameStore((s) => s.logout);
   const setLanguage = useGameStore((s) => s.setLanguage);
-  const deviceId = useGameStore((s) => s.deviceId);
-  const userId = useGameStore((s) => s.supabaseUserId);
   const getTotalStars = useGameStore((s) => s.getTotalStars);
-  const [purchaseLoading, setPurchaseLoading] = useState(false);
 
+  const { isSubscribed, offerings, purchase, isPurchasing } = useSubscription();
+  const isPremium = useGameStore((s) => s.isPremium) || isSubscribed;
+
+  const currentOffering = offerings?.current;
+  const packageToPurchase = currentOffering?.availablePackages[0];
+  const priceString = packageToPurchase?.product.priceString || '$2.99';
 
   async function handlePurchase() {
-    setPurchaseLoading(true);
-    try {
-      const success = await IAPService.purchasePremium(userId, deviceId);
-      if (success) {
-        setPremium(true);
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Alert.alert(t('settings.welcomePremium'), t('settings.premiumUnlocked'));
-      }
-    } catch {
+    if (!packageToPurchase) {
       Alert.alert(t('settings.error'), t('settings.purchaseFailed'));
-    } finally {
-      setPurchaseLoading(false);
+      return;
+    }
+    try {
+      await purchase(packageToPurchase);
+      setPremium(true);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert(t('settings.welcomePremium'), t('settings.premiumUnlocked'));
+    } catch (e: any) {
+      if (e?.userCancelled) return;
+      Alert.alert(t('settings.error'), t('settings.purchaseFailed'));
     }
   }
 
@@ -168,12 +170,12 @@ export default function SettingsScreen() {
         {!isPremium && (
           <Pressable
             onPress={handlePurchase}
-            disabled={purchaseLoading}
+            disabled={isPurchasing}
             style={({ pressed }) => [
               styles.premiumCard,
               {
                 backgroundColor: theme.secondary,
-                opacity: purchaseLoading ? 0.7 : pressed ? 0.9 : 1,
+                opacity: isPurchasing ? 0.7 : pressed ? 0.9 : 1,
                 transform: [{ scale: pressed ? 0.98 : 1 }],
               },
             ]}
@@ -192,7 +194,7 @@ export default function SettingsScreen() {
               <Text
                 style={[styles.premiumSub, { color: theme.textOnSecondary }]}
               >
-                {t('settings.premiumSub')}
+                {priceString}/month · {t('settings.premiumSub')}
               </Text>
             </View>
             <Ionicons
