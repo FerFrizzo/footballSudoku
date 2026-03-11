@@ -18,37 +18,69 @@ function shuffleWithRng<T>(arr: T[], rng: () => number): T[] {
   return result;
 }
 
-const FICTIONAL_PREFIXES = [
-  'Vorn', 'Keld', 'Tren', 'Axen', 'Brant', 'Drav', 'Elgar', 'Faldr', 'Grald', 'Halven',
-  'Invar', 'Karns', 'Lorim', 'Malven', 'Norven', 'Preld', 'Ravind', 'Streld', 'Thorval', 'Ulven',
-  'Valdri', 'Wrenth', 'Yovar', 'Zelvar', 'Aldren', 'Brimor', 'Caldris', 'Dorvath', 'Edvar', 'Fennor',
-  'Gorvel', 'Helstr', 'Ivorn', 'Jeldran', 'Kolvast', 'Lindvar', 'Morven', 'Naldr', 'Oxvarn', 'Pelgr',
+// Location parts sourced from real English top-5-division club names
+const LOCATION_PARTS: string[] = [
+  // Premier League
+  'Arsenal', 'Aston', 'Bournemouth', 'Brentford', 'Brighton', 'Chelsea',
+  'Crystal', 'Everton', 'Fulham', 'Ipswich', 'Leicester', 'Liverpool',
+  'Manchester', 'Newcastle', 'Nottingham', 'Southampton', 'Tottenham',
+  'Wolverhampton', 'West Ham',
+  // Championship
+  'Burnley', 'Leeds', 'Sheffield', 'Middlesbrough', 'Sunderland', 'Norwich',
+  'Stoke', 'Watford', 'Millwall', 'Coventry', 'Birmingham', 'Blackburn',
+  'Preston', 'Bristol', 'Cardiff', 'Swansea', 'Derby', 'Hull', 'Plymouth',
+  'Portsmouth', 'Luton', 'Charlton', 'Bolton', 'Blackpool', 'West Brom',
+  // League One
+  'Stockport', 'Wrexham', 'Doncaster', 'Wigan', 'Oxford', 'Cambridge',
+  'Peterborough', 'Exeter', 'Shrewsbury', 'Barnsley', 'Rotherham', 'Reading',
+  'Leyton', 'Burton', 'Cheltenham', 'Northampton', 'Colchester', 'Wycombe',
+  'Carlisle', 'Fleetwood', 'Port', 'Stevenage',
+  // League Two
+  'Morecambe', 'Harrogate', 'Newport', 'Salford', 'Crawley', 'Swindon',
+  'Bradford', 'Grimsby', 'Tranmere', 'Gillingham', 'Chesterfield', 'Walsall',
+  'Sutton', 'Barrow', 'Accrington',
+  // National League
+  'Altrincham', 'Barnet', 'Boston', 'Bromley', 'Darlington', 'Halifax',
+  'Gateshead', 'Hartlepool', 'Kidderminster', 'Maidstone', 'Maidenhead',
+  'Oldham', 'Rochdale', 'Solihull', 'Southend', 'Spennymoor', 'Tamworth',
+  'Torquay', 'Woking', 'Yeovil', 'York',
 ];
 
-const PLACE_ROOTS = [
-  'bridge', 'vale', 'haven', 'moor', 'dale', 'shaw', 'holt', 'croft',
-  'cliff', 'holm', 'beck', 'ridge', 'grove', 'mere', 'combe', 'stead',
-  'worth', 'field', 'ford', 'gate', 'wood', 'marsh', 'heath',
+// Suffix parts sourced from real English club name endings
+const SUFFIX_PARTS: string[] = [
+  'United', 'City', 'Town', 'Rovers', 'Athletic', 'Wanderers',
+  'Albion', 'County', 'Forest', 'Palace', 'Villa', 'Orient', 'Vale',
+  'Rangers', 'Hotspur',
 ];
 
-const NOUN_FIRST = [
-  'Iron', 'Ash', 'Crown', 'Anchor', 'Forge', 'Crest', 'Tower', 'Cinder',
-  'Granite', 'Ember', 'Thorn', 'Frost', 'Amber', 'Cobalt', 'Flint', 'Heron',
-  'Hawk', 'Raven', 'Falcon', 'Drake', 'Lark', 'Crane', 'Swift',
-  'Copper', 'Bronze', 'Scarlet', 'Crimson', 'Blaze', 'Gale', 'Crag',
-];
-
-const NOUN_SECOND = [
-  'wick', 'holt', 'worth', 'shaw', 'holm', 'wood', 'dale',
-  'bridge', 'croft', 'well', 'marsh', 'vale', 'moor', 'ford',
-  'gate', 'field', 'stead', 'beck', 'combe', 'ridge',
-];
-
-const SUFFIXES = [
-  'FC', 'United', 'Town', 'Rovers', 'Athletic', 'Borough',
-  'Rangers', 'Wanderers', 'Albion', 'Orient',
-  'Dynamo', 'Sporting', 'Crusaders', 'Nomads',
-];
+// Exact real team names to block — any generated combo matching one of these is rejected
+const REAL_NAMES_BLOCKLIST = new Set<string>([
+  // Premier League
+  'Aston Villa', 'Brighton Albion', 'Crystal Palace', 'Ipswich Town',
+  'Leicester City', 'Manchester City', 'Manchester United', 'Newcastle United',
+  'Nottingham Forest', 'Tottenham Hotspur', 'West Ham United',
+  'Wolverhampton Wanderers',
+  // Championship
+  'Leeds United', 'Sheffield United', 'Sheffield Wednesday', 'Norwich City',
+  'Stoke City', 'Coventry City', 'Birmingham City', 'Blackburn Rovers',
+  'Bristol City', 'Bristol Rovers', 'Cardiff City', 'Swansea City',
+  'Derby County', 'Hull City', 'Luton Town', 'Charlton Athletic',
+  'Bolton Wanderers', 'West Brom Albion',
+  // League One
+  'Stockport County', 'Doncaster Rovers', 'Wigan Athletic', 'Oxford United',
+  'Cambridge United', 'Peterborough United', 'Exeter City', 'Shrewsbury Town',
+  'Rotherham United', 'Leyton Orient', 'Burton Albion', 'Cheltenham Town',
+  'Northampton Town', 'Colchester United', 'Wycombe Wanderers', 'Carlisle United',
+  'Fleetwood Town', 'Port Vale',
+  // League Two
+  'Harrogate Town', 'Newport County', 'Salford City', 'Crawley Town',
+  'Swindon Town', 'Bradford City', 'Grimsby Town', 'Tranmere Rovers',
+  'Sutton United',
+  // National League
+  'Boston United', 'Hartlepool United', 'Maidstone United', 'Maidenhead United',
+  'Oldham Athletic', 'Southend United', 'Spennymoor Town', 'Torquay United',
+  'York City', 'Yeovil Town',
+]);
 
 const BADGE_COLORS = [
   '#E53935', '#D81B60', '#8E24AA', '#5E35B1', '#3949AB',
@@ -58,31 +90,14 @@ const BADGE_COLORS = [
 ];
 
 function generateClubName(rng: () => number, usedNames: Set<string>): string {
-  const maxAttempts = 300;
+  const maxAttempts = 500;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    let placeName: string;
+    const location = LOCATION_PARTS[Math.floor(rng() * LOCATION_PARTS.length)];
+    const suffix = SUFFIX_PARTS[Math.floor(rng() * SUFFIX_PARTS.length)];
+    const name = `${location} ${suffix}`;
 
-    const style = Math.floor(rng() * 3);
-    if (style === 0) {
-      const prefix = FICTIONAL_PREFIXES[Math.floor(rng() * FICTIONAL_PREFIXES.length)];
-      const root = PLACE_ROOTS[Math.floor(rng() * PLACE_ROOTS.length)];
-      placeName = prefix + root;
-    } else if (style === 1) {
-      const noun = NOUN_FIRST[Math.floor(rng() * NOUN_FIRST.length)];
-      const suffix = NOUN_SECOND[Math.floor(rng() * NOUN_SECOND.length)];
-      placeName = noun + suffix;
-    } else {
-      const prefix = FICTIONAL_PREFIXES[Math.floor(rng() * FICTIONAL_PREFIXES.length)];
-      const noun = NOUN_FIRST[Math.floor(rng() * NOUN_FIRST.length)];
-      const suffix = NOUN_SECOND[Math.floor(rng() * NOUN_SECOND.length)];
-      placeName = prefix + ' ' + noun + suffix;
-    }
-
-    const descriptor = SUFFIXES[Math.floor(rng() * SUFFIXES.length)];
-    const name = `${placeName} ${descriptor}`;
-
-    if (!usedNames.has(name)) {
+    if (!REAL_NAMES_BLOCKLIST.has(name) && !usedNames.has(name)) {
       usedNames.add(name);
       return name;
     }
