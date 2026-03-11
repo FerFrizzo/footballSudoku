@@ -11,6 +11,7 @@ export interface Theme {
   textSecondary: string;
   textOnPrimary: string;
   textOnSecondary: string;
+  primaryOnSurface: string;
   error: string;
   success: string;
   border: string;
@@ -54,6 +55,26 @@ function lighten(hex: string, amount: number): string {
   return `#${result.map((c) => c.toString(16).padStart(2, '0')).join('')}`;
 }
 
+// Returns a version of `color` that is always readable on a white (#FFFFFF) surface.
+// If the color is too light (insufficient contrast), falls back to dark text.
+function ensureReadableOnSurface(hex: string): string {
+  // Contrast ratio against white = (1 + 0.05) / (luminance + 0.05)
+  // We require at least 3:1 → luminance must be ≤ 0.3
+  return getLuminance(hex) > 0.3 ? '#1A1A1A' : hex;
+}
+
+// Returns `color` clamped so it is visibly distinct from white.
+// If the result is too close to white (luminance > threshold), returns `fallback`.
+function safeHighlight(hex: string, fallback: string): string {
+  return getLuminance(hex) > 0.92 ? fallback : hex;
+}
+
+// Returns `color` clamped so it remains visible against the white surface for decorative use.
+// If too light, darkens it slightly by blending with a neutral dark.
+function safeDecorative(hex: string, fallback: string): string {
+  return getLuminance(hex) > 0.85 ? fallback : hex;
+}
+
 const defaultTheme: Theme = {
   primary: '#1B5E20',
   secondary: '#FFD600',
@@ -64,6 +85,7 @@ const defaultTheme: Theme = {
   textSecondary: '#757575',
   textOnPrimary: '#FFFFFF',
   textOnSecondary: '#000000',
+  primaryOnSurface: '#1B5E20',
   error: '#D32F2F',
   success: '#388E3C',
   border: '#E0E0E0',
@@ -87,6 +109,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const primary = club.primaryColor || defaultTheme.primary;
     const secondary = club.secondaryColor || defaultTheme.secondary;
 
+    const rawHighlight = lighten(primary, 0.85);
+    const rawSelected = lighten(primary, 0.7);
+    const rawSameNumber = lighten(secondary, 0.75);
+
     return {
       primary,
       secondary,
@@ -97,15 +123,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       textSecondary: '#757575',
       textOnPrimary: getContrastText(primary),
       textOnSecondary: getContrastText(secondary),
+      // Readable version of primary for use as text on the white surface (grid cells)
+      primaryOnSurface: ensureReadableOnSurface(primary),
       error: '#D32F2F',
       success: '#388E3C',
       border: '#E0E0E0',
       gridLine: '#BDBDBD',
       gridBorder: '#424242',
-      cellHighlight: lighten(primary, 0.85),
-      cellSelected: lighten(primary, 0.7),
-      cellSameNumber: lighten(secondary, 0.75),
-      starFilled: secondary,
+      // Clamp highlights so they are never invisible against the white surface
+      cellHighlight: safeHighlight(rawHighlight, '#F0F0F0'),
+      cellSelected: safeHighlight(rawSelected, '#E0E0E0'),
+      cellSameNumber: safeHighlight(rawSameNumber, '#F5F5F5'),
+      // Star must be visible on light backgrounds
+      starFilled: safeDecorative(secondary, '#F0A500'),
       starEmpty: '#E0E0E0',
     };
   }, [club]);

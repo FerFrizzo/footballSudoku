@@ -209,8 +209,8 @@ export default function SettingsScreen() {
           <View
             style={[styles.premiumBadge, { backgroundColor: theme.cellHighlight }]}
           >
-            <Ionicons name="checkmark-circle" size={20} color={theme.primary} />
-            <Text style={[styles.premiumBadgeText, { color: theme.primary }]}>
+            <Ionicons name="checkmark-circle" size={20} color={theme.primaryOnSurface} />
+            <Text style={[styles.premiumBadgeText, { color: theme.primaryOnSurface }]}>
               {t('settings.premiumActive')}
             </Text>
           </View>

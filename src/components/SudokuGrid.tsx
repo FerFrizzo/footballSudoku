@@ -51,7 +51,7 @@ const Cell = memo(function Cell({
 
   let textColor = theme.text;
   if (isError || isConflict) textColor = theme.error;
-  else if (isGiven) textColor = theme.primary;
+  else if (isGiven) textColor = theme.primaryOnSurface;
 
   return (
     <Pressable

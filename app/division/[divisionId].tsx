@@ -123,12 +123,12 @@ export default function DivisionScreen() {
           onPress={() => setActiveTab('matchdays')}
           style={[
             styles.tab,
-            activeTab === 'matchdays' && { borderBottomColor: theme.primary, borderBottomWidth: 2 },
+            activeTab === 'matchdays' && { borderBottomColor: theme.primaryOnSurface, borderBottomWidth: 2 },
           ]}
         >
           <Text style={[
             styles.tabText,
-            { color: activeTab === 'matchdays' ? theme.primary : theme.textSecondary },
+            { color: activeTab === 'matchdays' ? theme.primaryOnSurface : theme.textSecondary },
           ]}>
             {t('division.matchdays')}
           </Text>
@@ -137,12 +137,12 @@ export default function DivisionScreen() {
           onPress={() => setActiveTab('table')}
           style={[
             styles.tab,
-            activeTab === 'table' && { borderBottomColor: theme.primary, borderBottomWidth: 2 },
+            activeTab === 'table' && { borderBottomColor: theme.primaryOnSurface, borderBottomWidth: 2 },
           ]}
         >
           <Text style={[
             styles.tabText,
-            { color: activeTab === 'table' ? theme.primary : theme.textSecondary },
+            { color: activeTab === 'table' ? theme.primaryOnSurface : theme.textSecondary },
           ]}>
             {t('division.leagueTable')}
           </Text>
@@ -183,7 +183,7 @@ export default function DivisionScreen() {
                     borderLeftColor: isCompleted
                       ? (resultBadge === 'win' ? '#388E3C' : resultBadge === 'draw' ? '#F57F17' : '#D32F2F')
                       : unlocked
-                        ? theme.primary
+                        ? theme.primaryOnSurface
                         : '#E0E0E0',
                     opacity: unlocked ? (pressed ? 0.9 : 1) : 0.5,
                     transform: [{ scale: pressed && unlocked ? 0.98 : 1 }],
@@ -197,7 +197,7 @@ export default function DivisionScreen() {
                   ]}>
                     <Text style={[
                       styles.matchdayNumText,
-                      { color: unlocked ? theme.primary : '#BDBDBD' },
+                      { color: unlocked ? theme.primaryOnSurface : '#BDBDBD' },
                     ]}>
                       {matchdayIndex + 1}
                     </Text>
@@ -307,7 +307,7 @@ export default function DivisionScreen() {
                 style={[
                   styles.tableRow,
                   { backgroundColor: rowBg },
-                  isUserTeam && { borderLeftWidth: 3, borderLeftColor: theme.primary },
+                  isUserTeam && { borderLeftWidth: 3, borderLeftColor: theme.primaryOnSurface },
                 ]}
               >
                 <Text style={[styles.tdPos, {
