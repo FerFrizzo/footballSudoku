@@ -34,8 +34,8 @@ export default function PyramidMapScreen() {
   const webBottomInset = Platform.OS === 'web' ? 34 : 0;
 
   useEffect(() => {
-    initDivision('10');
-  }, []);
+    if (club) initDivision('10');
+  }, [club?.name]);
 
   const reversedDivisions = [...DIVISIONS].reverse();
 

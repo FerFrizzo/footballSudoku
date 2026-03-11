@@ -41,6 +41,7 @@ export default function DivisionScreen() {
   const getMatchdayProgress = useGameStore((s) => s.getMatchdayProgress);
   const getLeagueTable = useGameStore((s) => s.getLeagueTable);
   const league = useGameStore((s) => divisionId ? s.leagueProgress[divisionId] : undefined);
+  const club = useGameStore((s) => s.club);
   const userId = useGameStore((s) => s.supabaseUserId);
   const deviceId = useGameStore((s) => s.deviceId);
 
@@ -48,10 +49,10 @@ export default function DivisionScreen() {
   const webBottomInset = Platform.OS === 'web' ? 34 : 0;
 
   useEffect(() => {
-    if (divisionId) {
+    if (divisionId && club) {
       initDivision(divisionId);
     }
-  }, [divisionId]);
+  }, [divisionId, club?.name]);
 
   useEffect(() => {
     if (activeTab === 'table' && divisionId) {

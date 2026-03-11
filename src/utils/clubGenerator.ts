@@ -18,33 +18,83 @@ function shuffleWithRng<T>(arr: T[], rng: () => number): T[] {
   return result;
 }
 
-const PREFIXES = [
-  'North', 'South', 'East', 'West', 'New', 'Old', 'Upper', 'Lower',
-  'Great', 'Little', 'High', 'Long',
+// Place-name parts extracted from English football clubs
+// across the top 5 tiers (Premier League → National League)
+const PLACE_PARTS = [
+  // Premier League
+  'Arsenal', 'Aston', 'Bournemouth', 'Brentford', 'Brighton',
+  'Chelsea', 'Everton', 'Fulham', 'Ipswich', 'Leicester',
+  'Liverpool', 'Manchester', 'Newcastle', 'Nottingham', 'Southampton',
+  'Tottenham', 'Wolverhampton', 'Crystal', 'West Ham',
+  // Championship
+  'Blackburn', 'Bristol', 'Burnley', 'Cardiff', 'Coventry',
+  'Derby', 'Hull', 'Leeds', 'Luton', 'Middlesbrough',
+  'Millwall', 'Norwich', 'Oxford', 'Plymouth', 'Portsmouth',
+  'Preston', 'Sheffield', 'Stoke', 'Sunderland', 'Swansea', 'Watford',
+  // League One
+  'Barnsley', 'Birmingham', 'Blackpool', 'Bolton', 'Burton',
+  'Cambridge', 'Charlton', 'Crawley', 'Exeter', 'Huddersfield',
+  'Leyton', 'Lincoln', 'Northampton', 'Peterborough', 'Rotherham',
+  'Shrewsbury', 'Stevenage', 'Stockport', 'Wigan', 'Wrexham', 'Wycombe',
+  // League Two
+  'Barrow', 'Bradford', 'Bromley', 'Carlisle', 'Cheltenham',
+  'Chesterfield', 'Colchester', 'Crewe', 'Doncaster', 'Fleetwood',
+  'Gillingham', 'Grimsby', 'Harrogate', 'Mansfield', 'Morecambe',
+  'Newport', 'Salford', 'Swindon', 'Tranmere', 'Walsall', 'York',
+  // National League
+  'Aldershot', 'Altrincham', 'Gateshead', 'Kidderminster', 'Maidstone',
+  'Oldham', 'Rochdale', 'Scunthorpe', 'Southend', 'Tamworth', 'Woking',
+  'Notts', 'Reading', 'Halifax',
 ];
 
-const ROOTS = [
-  'bridge', 'field', 'ford', 'vale', 'port', 'castle', 'haven', 'mont',
-  'gate', 'ton', 'wich', 'bury', 'moor', 'wood', 'dale', 'holm',
-  'stead', 'ham', 'worth', 'ley', 'den', 'croft', 'mere', 'ridge',
+// Descriptor parts extracted from English football clubs
+const DESCRIPTOR_PARTS = [
+  'United', 'City', 'Town', 'Rovers', 'Athletic', 'County',
+  'Wanderers', 'Forest', 'Hotspur', 'Argyle', 'Villa', 'Palace',
+  'Albion', 'Rangers', 'Alexandra', 'Orient', 'Harriers', 'Borough',
+  'North End', 'Wednesday', 'Park Rangers',
 ];
 
-const NOUN_PREFIXES = [
-  'River', 'Harbor', 'Iron', 'Stone', 'Oak', 'Ash', 'Crown', 'Foundry',
-  'Dock', 'Silver', 'Golden', 'Copper', 'Storm', 'Frost', 'Heath',
-  'Beacon', 'Forge', 'Cliff', 'Marsh', 'Glen', 'Pike', 'Elm', 'Hawk',
-  'Bramble', 'Thistle', 'Wren', 'Falcon', 'Anvil', 'Flint', 'Briar',
-];
-
-const NOUN_ROOTS = [
-  'side', 'gate', 'ton', 'wich', 'bury', 'moor', 'ford',
-  'dale', 'field', 'wood', 'vale', 'ham', 'holm', 'den',
-];
-
-const SUFFIXES = [
-  'FC', 'United', 'Town', 'Rovers', 'Athletic', 'Borough', 'City',
-  'Rangers', 'Wanderers', 'Albion', 'Dynamo', 'Sporting',
-];
+// Full list of actual real English football team names to filter out
+// (covers Premier League + Championship + League One + League Two + National League)
+const REAL_TEAM_NAMES = new Set([
+  // Premier League
+  'Arsenal', 'Arsenal FC', 'Arsenal United', 'Aston Villa', 'Bournemouth',
+  'AFC Bournemouth', 'Brentford', 'Brighton & Hove Albion', 'Brighton City',
+  'Chelsea', 'Chelsea FC', 'Crystal Palace', 'Everton', 'Fulham',
+  'Ipswich Town', 'Leicester City', 'Liverpool', 'Liverpool FC',
+  'Manchester City', 'Manchester United', 'Newcastle United',
+  'Nottingham Forest', 'Southampton', 'Tottenham Hotspur', 'Tottenham United',
+  'West Ham United', 'Wolverhampton Wanderers',
+  // Championship
+  'Blackburn Rovers', 'Bristol City', 'Bristol Rovers', 'Burnley',
+  'Cardiff City', 'Coventry City', 'Derby County', 'Hull City',
+  'Leeds United', 'Luton Town', 'Middlesbrough', 'Millwall',
+  'Norwich City', 'Oxford United', 'Plymouth Argyle', 'Portsmouth',
+  'Preston North End', 'Queens Park Rangers', 'Sheffield United',
+  'Sheffield Wednesday', 'Stoke City', 'Sunderland', 'Swansea City', 'Watford',
+  'West Bromwich Albion',
+  // League One
+  'Barnsley', 'Birmingham City', 'Blackpool', 'Bolton Wanderers',
+  'Burton Albion', 'Cambridge United', 'Charlton Athletic', 'Crawley Town',
+  'Exeter City', 'Huddersfield Town', 'Leyton Orient', 'Lincoln City',
+  'Northampton Town', 'Peterborough United', 'Reading', 'Rotherham United',
+  'Shrewsbury Town', 'Stevenage', 'Stockport County', 'Wigan Athletic',
+  'Wrexham', 'Wycombe Wanderers', 'MK Dons', 'AFC Wimbledon',
+  // League Two
+  'Barrow', 'Bradford City', 'Bromley', 'Carlisle United', 'Cheltenham Town',
+  'Chesterfield', 'Colchester United', 'Crewe Alexandra', 'Doncaster Rovers',
+  'Fleetwood Town', 'Gillingham', 'Grimsby Town', 'Harrogate Town',
+  'Mansfield Town', 'Morecambe', 'Newport County', 'Notts County', 'Salford City',
+  'Swindon Town', 'Tranmere Rovers', 'Walsall', 'York City',
+  // National League
+  'Aldershot Town', 'Altrincham', 'Boreham Wood', 'Boston United',
+  'Braintree Town', 'Chester', 'Dagenham & Redbridge', 'Eastleigh',
+  'FC Halifax Town', 'Halifax Town', 'Gateshead', 'Kidderminster Harriers',
+  'Maidstone United', 'Oldham Athletic', 'Rochdale', 'Scunthorpe United',
+  'Solihull Moors', 'Southend United', 'Tamworth', 'Wealdstone', 'Weymouth',
+  'Woking',
+]);
 
 const BADGE_COLORS = [
   '#E53935', '#D81B60', '#8E24AA', '#5E35B1', '#3949AB',
@@ -54,28 +104,19 @@ const BADGE_COLORS = [
 ];
 
 function generateClubName(rng: () => number, usedNames: Set<string>): string {
-  const maxAttempts = 50;
+  const maxAttempts = 200;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    let name: string;
+    const place = PLACE_PARTS[Math.floor(rng() * PLACE_PARTS.length)];
+    const descriptor = DESCRIPTOR_PARTS[Math.floor(rng() * DESCRIPTOR_PARTS.length)];
+    const name = `${place} ${descriptor}`;
 
-    if (rng() < 0.5) {
-      const prefix = PREFIXES[Math.floor(rng() * PREFIXES.length)];
-      const root = ROOTS[Math.floor(rng() * ROOTS.length)];
-      const suffix = SUFFIXES[Math.floor(rng() * SUFFIXES.length)];
-      name = `${prefix}${root} ${suffix}`;
-    } else {
-      const noun = NOUN_PREFIXES[Math.floor(rng() * NOUN_PREFIXES.length)];
-      const root = NOUN_ROOTS[Math.floor(rng() * NOUN_ROOTS.length)];
-      const suffix = SUFFIXES[Math.floor(rng() * SUFFIXES.length)];
-      name = `${noun}${root} ${suffix}`;
-    }
-
-    if (!usedNames.has(name)) {
+    if (!usedNames.has(name) && !REAL_TEAM_NAMES.has(name)) {
       usedNames.add(name);
       return name;
     }
   }
 
+  // Fallback: guaranteed unique name
   const fallback = `Club ${Math.floor(rng() * 9000 + 1000)}`;
   usedNames.add(fallback);
   return fallback;

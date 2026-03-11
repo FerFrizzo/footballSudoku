@@ -86,8 +86,9 @@ export const useGameStore = create<GameState>()(
       initDivision: (divisionId) => {
         const state = get();
         if (state.leagueProgress[divisionId]) return;
+        if (!state.club) return;
 
-        const clubName = state.club?.name || 'My Club';
+        const clubName = state.club.name;
         const seed = parseInt(divisionId) * 31337;
         const teams = generateLeagueTeams(divisionId, clubName, seed);
         const matchdays: MatchdayProgress[] = Array.from({ length: 20 }, () => ({
