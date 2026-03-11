@@ -63,6 +63,7 @@ export default {
     undo: 'Rückgängig',
     erase: 'Löschen',
     notes: 'Notizen',
+    autoCompleting: 'Automatisch vervollständigen...',
   },
   completion: {
     matchdayComplete: 'Spieltag Abgeschlossen!',

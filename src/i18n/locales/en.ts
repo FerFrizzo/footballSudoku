@@ -63,6 +63,7 @@ export default {
     undo: 'Undo',
     erase: 'Erase',
     notes: 'Notes',
+    autoCompleting: 'Auto-completing...',
   },
   completion: {
     matchdayComplete: 'Matchday Complete!',

@@ -63,6 +63,7 @@ export default {
     undo: 'Annulla',
     erase: 'Cancella',
     notes: 'Note',
+    autoCompleting: 'Completamento automatico...',
   },
   completion: {
     matchdayComplete: 'Giornata Completata!',

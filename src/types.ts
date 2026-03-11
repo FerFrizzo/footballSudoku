@@ -178,22 +178,48 @@ export const DIVISION_DIFFICULTY_LABELS: Record<string, string> = {
   '10': 'Beginner',
 };
 
-export const COMPLETION_DIALOGUES = [
-  "Great result today! The fans are buzzing after that performance.",
-  "The gaffer is pleased with your display. Keep that form going!",
-  "That was a tactical masterclass out there. The scouts are taking notice.",
-  "Three points in the bag! On to the next fixture.",
-  "The chairman has noticed your recent form. Good things are coming.",
-  "What a display of skill! You are becoming a fan favourite.",
-  "Solid performance. The dressing room morale has never been higher.",
-  "The local press is raving about your match intelligence!",
-  "Training has paid off. You are getting sharper with every matchday.",
-  "The Supporters Trust voted you Player of the Match!",
-  "The youth academy players are looking up to you now.",
-  "Talk of a new contract is circulating around the training ground.",
-  "A clean sheet performance! The defence was watertight today.",
-  "The kit man says he has never seen anyone work this hard.",
-  "Post-match interview went brilliantly. The media loves you.",
+export const WIN_DIALOGUES = [
+  "Brilliant! Three points in the bag. The squad is buzzing after that display!",
+  "Outstanding performance! The fans will be talking about this one for weeks.",
+  "What a win! The gaffer is absolutely delighted. Dressing room morale is sky-high!",
+  "Three points secured! That is the kind of performance that gets scouts talking.",
+  "A masterclass today. The chairman has noticed and word is spreading fast.",
+  "Victory! The atmosphere in the dressing room is electric right now.",
+  "Textbook from start to finish. The opposition barely had a look in.",
+  "Maximum points! The tactical approach was spot on from the first whistle.",
+  "Unstoppable today. Three points keeps us right in the hunt at the top of the table!",
+  "Magnificent! The Supporters Trust has voted you Player of the Match.",
+  "That win sends a message to every team in this division. We mean business.",
+  "The lads followed your lead and delivered. Three very well-earned points.",
+  "Match intelligence like that is rare. The youth players watched and took notes.",
+  "Dominant from start to finish. The table is looking very healthy right now.",
+  "New contract talk is heating up after a display like that. Win well earned.",
+];
+
+export const DRAW_DIALOGUES = [
+  "A point on the board. Solid show today, though we know there is more to give.",
+  "Not the result we wanted, but we stayed composed. A draw keeps us in touch.",
+  "Tough opponent today. We take the point and move on to the next challenge.",
+  "Hard-fought draw. The resilience shown today was exactly what this club needs.",
+  "A fair result in a tight contest. We dust ourselves off and go again next time.",
+  "One point earned. Keep that focus and the wins will come.",
+  "Competitive performance today. A draw is not a disaster — we stay in the fight.",
+  "We matched them all the way. That point could be valuable come end of season.",
+  "Honours even. The character shown was encouraging. We build on this.",
+  "Proud of the effort today. A point here could still prove very important.",
+];
+
+export const LOSS_DIALOGUES = [
+  "Tough one to take. But the best players use defeat as fuel. Come back stronger.",
+  "That result hurts. Regroup, recover, and be ready to answer back next matchday.",
+  "Not our day, but one result does not define a season. Stay focused.",
+  "A difficult afternoon. The squad needs to reflect and come back with more.",
+  "Defeat is part of the journey. What matters now is how we respond.",
+  "Hard to take, but every champion has been here. The question is what happens next.",
+  "We owe the fans better. Use this as motivation and go again next match.",
+  "That one went against us. Chin up — we need a reaction in the very next game.",
+  "No sugarcoating it: we were second best today. The work starts again tomorrow.",
+  "A setback, not a surrender. The table still has everything to play for.",
 ];
 
 export const PROMOTION_DIALOGUES: Record<string, string> = {

@@ -63,6 +63,7 @@ export default {
     undo: 'Cofnij',
     erase: 'Wymaż',
     notes: 'Notatki',
+    autoCompleting: 'Automatyczne uzupełnianie...',
   },
   completion: {
     matchdayComplete: 'Kolejka ukończona!',

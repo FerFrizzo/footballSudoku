@@ -63,6 +63,7 @@ export default {
     undo: 'Deshacer',
     erase: 'Borrar',
     notes: 'Notas',
+    autoCompleting: 'Completando automáticamente...',
   },
   completion: {
     matchdayComplete: '¡Jornada Completada!',

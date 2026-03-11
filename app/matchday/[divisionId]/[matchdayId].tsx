@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/src/theme/ThemeProvider';
 import { useGameStore } from '@/src/state/gameStore';
-import { DIVISIONS, COMPLETION_DIALOGUES, HINT_COST_GEMS, FREE_HINTS_PER_LEVEL, PREMIUM_HINTS_PER_LEVEL } from '@/src/types';
+import { DIVISIONS, WIN_DIALOGUES, DRAW_DIALOGUES, LOSS_DIALOGUES, HINT_COST_GEMS, FREE_HINTS_PER_LEVEL, PREMIUM_HINTS_PER_LEVEL } from '@/src/types';
 import {
   generatePuzzle,
   getGivensForLevel,
@@ -90,9 +90,11 @@ export default function MatchdayScreen() {
     matchResult: 'loss' as 'win' | 'draw' | 'loss',
     pointsEarned: 0,
   });
+  const [autoCompleting, setAutoCompleting] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isCompleteRef = useRef(false);
+  const autoCompleteRef = useRef(false);
 
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
 
@@ -206,17 +208,63 @@ export default function MatchdayScreen() {
     [solution, timer, mistakes, hintsUsed, divisionTier, divisionId, matchdayIndex]
   );
 
-  const checkCompletion = useCallback(
-    (newBoard: number[][], currentMistakes?: number) => {
-      if (isCompleteRef.current) return;
+  const triggerAutoComplete = useCallback(
+    (currentBoard: number[][], currentMistakes?: number) => {
+      if (isCompleteRef.current || autoCompleteRef.current) return;
+      autoCompleteRef.current = true;
+
+      const emptyCells: [number, number][] = [];
       for (let r = 0; r < 9; r++) {
         for (let c = 0; c < 9; c++) {
-          if (newBoard[r][c] !== solution[r][c]) return;
+          if (currentBoard[r][c] === 0) emptyCells.push([r, c]);
         }
       }
-      triggerEnd(undefined, currentMistakes);
+      if (emptyCells.length === 0) return;
+
+      setAutoCompleting(true);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+      emptyCells.forEach(([r, c], idx) => {
+        setTimeout(() => {
+          setBoard((prev) => {
+            const b = prev.map((row) => [...row]);
+            b[r][c] = solution[r][c];
+            return b;
+          });
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          if (idx === emptyCells.length - 1) {
+            setTimeout(() => {
+              setAutoCompleting(false);
+              triggerEnd(undefined, currentMistakes);
+            }, 250);
+          }
+        }, idx * 140);
+      });
     },
     [solution, triggerEnd]
+  );
+
+  const checkCompletion = useCallback(
+    (newBoard: number[][], currentMistakes?: number) => {
+      if (isCompleteRef.current || autoCompleteRef.current) return;
+
+      let empty = 0;
+      let wrong = 0;
+      for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+          if (newBoard[r][c] === 0) empty++;
+          else if (newBoard[r][c] !== solution[r][c]) wrong++;
+        }
+      }
+
+      if (wrong > 0) return;
+      if (empty === 0) {
+        triggerEnd(undefined, currentMistakes);
+      } else if (empty <= 3) {
+        triggerAutoComplete(newBoard, currentMistakes);
+      }
+    },
+    [solution, triggerEnd, triggerAutoComplete]
   );
 
   function pushUndo() {
@@ -232,13 +280,14 @@ export default function MatchdayScreen() {
   }
 
   function handleCellPress(row: number, col: number) {
+    if (autoCompleting) return;
     setSelectedRow(row);
     setSelectedCol(col);
     Haptics.selectionAsync();
   }
 
   function handleNumberPress(num: number) {
-    if (selectedRow < 0 || isCompleteRef.current) return;
+    if (selectedRow < 0 || isCompleteRef.current || autoCompleting) return;
     if (given[selectedRow][selectedCol]) return;
 
     pushUndo();
@@ -406,10 +455,14 @@ export default function MatchdayScreen() {
       await AdsService.showInterstitial(userId, deviceId);
     }
 
-    const dialogue =
-      COMPLETION_DIALOGUES[
-        Math.floor(Math.random() * COMPLETION_DIALOGUES.length)
-      ];
+    const result = completionData.matchResult;
+    const pool =
+      result === 'win'
+        ? WIN_DIALOGUES
+        : result === 'draw'
+        ? DRAW_DIALOGUES
+        : LOSS_DIALOGUES;
+    const dialogue = pool[Math.floor(Math.random() * pool.length)];
 
     router.push({
       pathname: '/dialogue',
@@ -519,7 +572,16 @@ export default function MatchdayScreen() {
         />
       </View>
 
-      <View style={[styles.padWrapper, { paddingBottom: insets.bottom + 16 }]}>
+      {autoCompleting && (
+        <View style={[styles.autoCompleteBanner, { backgroundColor: theme.primary }]}>
+          <Ionicons name="flash" size={16} color={theme.textOnPrimary} />
+          <Text style={[styles.autoCompleteText, { color: theme.textOnPrimary }]}>
+            {t('game.autoCompleting')}
+          </Text>
+        </View>
+      )}
+
+      <View style={[styles.padWrapper, { paddingBottom: insets.bottom + 16, opacity: autoCompleting ? 0.4 : 1 }]}>
         <NumberPad
           board={board}
           onNumberPress={handleNumberPress}
@@ -608,5 +670,20 @@ const styles = StyleSheet.create({
   },
   padWrapper: {
     paddingTop: 12,
+  },
+  autoCompleteBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    marginHorizontal: 24,
+    marginBottom: 4,
+    borderRadius: 10,
+  },
+  autoCompleteText: {
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
+    letterSpacing: 0.3,
   },
 });
