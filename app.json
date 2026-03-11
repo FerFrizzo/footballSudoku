@@ -26,9 +26,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       }
     },
-    "web": {
-      "favicon": "./assets/images/favicon.png"
-    },
+    "platforms": ["ios", "android"],
     "plugins": [
       [
         "expo-router",

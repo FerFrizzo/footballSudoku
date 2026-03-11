@@ -43,8 +43,6 @@ export default function SettingsScreen() {
   const getTotalStars = useGameStore((s) => s.getTotalStars);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
 
-  const webTopInset = Platform.OS === 'web' ? 67 : 0;
-  const webBottomInset = Platform.OS === 'web' ? 34 : 0;
 
   async function handlePurchase() {
     setPurchaseLoading(true);
@@ -93,7 +91,7 @@ export default function SettingsScreen() {
         style={[
           styles.header,
           {
-            paddingTop: insets.top + 8 + webTopInset,
+            paddingTop: insets.top + 8,
             backgroundColor: theme.primary,
           },
         ]}
@@ -106,7 +104,7 @@ export default function SettingsScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: insets.bottom + 90 + webBottomInset },
+          { paddingBottom: insets.bottom + 90 },
         ]}
         showsVerticalScrollIndicator={false}
       >

@@ -23,8 +23,6 @@ export default function DialogueScreen() {
   const theme = useTheme();
   const { t } = useTranslation();
 
-  const webTopInset = Platform.OS === 'web' ? 67 : 0;
-  const webBottomInset = Platform.OS === 'web' ? 34 : 0;
   const isPromotion = type === 'promotion';
 
   return (
@@ -33,8 +31,8 @@ export default function DialogueScreen() {
         styles.container,
         {
           backgroundColor: isPromotion ? theme.primary : theme.background,
-          paddingTop: insets.top + 40 + webTopInset,
-          paddingBottom: insets.bottom + 40 + webBottomInset,
+          paddingTop: insets.top + 40,
+          paddingBottom: insets.bottom + 40,
         },
       ]}
     >

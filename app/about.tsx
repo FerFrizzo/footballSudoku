@@ -19,16 +19,13 @@ export default function AboutScreen() {
   const theme = useTheme();
   const { t } = useTranslation();
 
-  const webTopInset = Platform.OS === 'web' ? 67 : 0;
-  const webBottomInset = Platform.OS === 'web' ? 34 : 0;
-
   return (
     <View style={[styles.flex, { backgroundColor: theme.background }]}>
       <View
         style={[
           styles.header,
           {
-            paddingTop: insets.top + 8 + webTopInset,
+            paddingTop: insets.top + 8,
             backgroundColor: theme.primary,
           },
         ]}
@@ -55,7 +52,7 @@ export default function AboutScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.content,
-          { paddingBottom: insets.bottom + 40 + webBottomInset },
+          { paddingBottom: insets.bottom + 40 },
         ]}
         showsVerticalScrollIndicator={false}
       >

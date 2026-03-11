@@ -45,8 +45,6 @@ export default function DivisionScreen() {
   const userId = useGameStore((s) => s.supabaseUserId);
   const deviceId = useGameStore((s) => s.deviceId);
 
-  const webTopInset = Platform.OS === 'web' ? 67 : 0;
-  const webBottomInset = Platform.OS === 'web' ? 34 : 0;
 
   useEffect(() => {
     if (divisionId && club) {
@@ -92,7 +90,7 @@ export default function DivisionScreen() {
         style={[
           styles.header,
           {
-            paddingTop: insets.top + 8 + webTopInset,
+            paddingTop: insets.top + 8,
             backgroundColor: theme.primary,
           },
         ]}
@@ -158,7 +156,7 @@ export default function DivisionScreen() {
           keyExtractor={(item) => String(item)}
           contentContainerStyle={[
             styles.listContent,
-            { paddingBottom: insets.bottom + 20 + webBottomInset },
+            { paddingBottom: insets.bottom + 20 },
           ]}
           ListHeaderComponent={
             <Text style={[styles.narrative, { color: theme.textSecondary }]}>
@@ -277,7 +275,7 @@ export default function DivisionScreen() {
         <ScrollView
           contentContainerStyle={[
             styles.tableContent,
-            { paddingBottom: insets.bottom + 20 + webBottomInset },
+            { paddingBottom: insets.bottom + 20 },
           ]}
           showsVerticalScrollIndicator={false}
         >

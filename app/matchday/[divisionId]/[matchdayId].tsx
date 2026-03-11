@@ -96,7 +96,6 @@ export default function MatchdayScreen() {
   const isCompleteRef = useRef(false);
   const autoCompleteRef = useRef(false);
 
-  const webTopInset = Platform.OS === 'web' ? 67 : 0;
 
   const hintsAvailable = isPremium
     ? PREMIUM_HINTS_PER_LEVEL - hintsUsed
@@ -515,7 +514,7 @@ export default function MatchdayScreen() {
         style={[
           styles.header,
           {
-            paddingTop: insets.top + 4 + webTopInset,
+            paddingTop: insets.top + 4,
             backgroundColor: theme.primary,
           },
         ]}

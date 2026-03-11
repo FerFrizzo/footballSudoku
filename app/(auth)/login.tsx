@@ -32,7 +32,6 @@ export default function LoginScreen() {
   const setAuthenticated = useGameStore((s) => s.setAuthenticated);
   const deviceId = useGameStore((s) => s.deviceId);
 
-  const webTopInset = Platform.OS === 'web' ? 67 : 0;
 
   async function handleAuth() {
     if (!email.trim() || !password.trim()) {
@@ -118,7 +117,7 @@ export default function LoginScreen() {
         contentContainerStyle={[
           styles.container,
           {
-            paddingTop: insets.top + 40 + webTopInset,
+            paddingTop: insets.top + 40,
             paddingBottom: insets.bottom + 40,
           },
         ]}

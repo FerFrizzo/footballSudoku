@@ -27,7 +27,6 @@ function NativeTabLayout() {
 function ClassicTabLayout() {
   const theme = useTheme();
   const { t } = useTranslation();
-  const isWeb = Platform.OS === 'web';
   const isIOS = Platform.OS === 'ios';
 
   return (
@@ -39,10 +38,8 @@ function ClassicTabLayout() {
         tabBarStyle: {
           position: 'absolute',
           backgroundColor: isIOS ? 'transparent' : '#FFFFFF',
-          borderTopWidth: isWeb ? 1 : 0,
-          borderTopColor: '#E0E0E0',
+          borderTopWidth: 0,
           elevation: 0,
-          ...(isWeb ? { height: 84 } : {}),
         },
         tabBarBackground: () =>
           isIOS ? (
@@ -50,13 +47,6 @@ function ClassicTabLayout() {
               intensity={100}
               tint="light"
               style={StyleSheet.absoluteFill}
-            />
-          ) : isWeb ? (
-            <View
-              style={[
-                StyleSheet.absoluteFill,
-                { backgroundColor: '#FFFFFF' },
-              ]}
             />
           ) : null,
         tabBarLabelStyle: {

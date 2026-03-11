@@ -34,8 +34,6 @@ export default function ClubSetupScreen() {
   const deviceId = useGameStore((s) => s.deviceId);
   const userId = useGameStore((s) => s.supabaseUserId);
 
-  const webTopInset = Platform.OS === 'web' ? 67 : 0;
-
   async function pickImage() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -77,7 +75,7 @@ export default function ClubSetupScreen() {
         contentContainerStyle={[
           styles.container,
           {
-            paddingTop: insets.top + 24 + webTopInset,
+            paddingTop: insets.top + 24,
             paddingBottom: insets.bottom + 24,
           },
         ]}

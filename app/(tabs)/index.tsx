@@ -30,8 +30,6 @@ export default function PyramidMapScreen() {
   const initDivision = useGameStore((s) => s.initDivision);
 
   const totalStars = getTotalStars();
-  const webTopInset = Platform.OS === 'web' ? 67 : 0;
-  const webBottomInset = Platform.OS === 'web' ? 34 : 0;
 
   useEffect(() => {
     if (club) initDivision('10');
@@ -45,7 +43,7 @@ export default function PyramidMapScreen() {
         style={[
           styles.header,
           {
-            paddingTop: insets.top + 8 + webTopInset,
+            paddingTop: insets.top + 8,
             backgroundColor: theme.primary,
           },
         ]}
@@ -106,7 +104,7 @@ export default function PyramidMapScreen() {
         contentContainerStyle={[
           styles.scrollContent,
           {
-            paddingBottom: insets.bottom + 90 + webBottomInset,
+            paddingBottom: insets.bottom + 90,
           },
         ]}
         showsVerticalScrollIndicator={false}

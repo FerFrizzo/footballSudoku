@@ -1,5 +1,4 @@
-// template
-import { Platform, ScrollView, ScrollViewProps } from "react-native";
+import { ScrollViewProps } from "react-native";
 import {
   KeyboardAwareScrollView,
   KeyboardAwareScrollViewProps,
@@ -12,13 +11,6 @@ export function KeyboardAwareScrollViewCompat({
   keyboardShouldPersistTaps = "handled",
   ...props
 }: Props) {
-  if (Platform.OS === "web") {
-    return (
-      <ScrollView keyboardShouldPersistTaps={keyboardShouldPersistTaps} {...props}>
-        {children}
-      </ScrollView>
-    );
-  }
   return (
     <KeyboardAwareScrollView
       keyboardShouldPersistTaps={keyboardShouldPersistTaps}
