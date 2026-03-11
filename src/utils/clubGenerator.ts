@@ -18,37 +18,36 @@ function shuffleWithRng<T>(arr: T[], rng: () => number): T[] {
   return result;
 }
 
-const PLACE_PREFIXES = [
-  'North', 'South', 'East', 'West', 'New', 'Old', 'Upper', 'Lower',
-  'Great', 'Little', 'High', 'Low', 'Long', 'Far', 'Mid',
+const FICTIONAL_PREFIXES = [
+  'Vorn', 'Keld', 'Tren', 'Axen', 'Brant', 'Drav', 'Elgar', 'Faldr', 'Grald', 'Halven',
+  'Invar', 'Karns', 'Lorim', 'Malven', 'Norven', 'Preld', 'Ravind', 'Streld', 'Thorval', 'Ulven',
+  'Valdri', 'Wrenth', 'Yovar', 'Zelvar', 'Aldren', 'Brimor', 'Caldris', 'Dorvath', 'Edvar', 'Fennor',
+  'Gorvel', 'Helstr', 'Ivorn', 'Jeldran', 'Kolvast', 'Lindvar', 'Morven', 'Naldr', 'Oxvarn', 'Pelgr',
 ];
 
 const PLACE_ROOTS = [
-  'bridge', 'field', 'ford', 'vale', 'port', 'castle', 'haven',
-  'gate', 'ton', 'wich', 'bury', 'moor', 'wood', 'dale', 'shaw',
-  'holt', 'croft', 'thorpe', 'cliff', 'holm', 'beck', 'ridge',
-  'cross', 'marsh', 'heath', 'grove', 'brook', 'stone', 'mill',
-  'mere', 'well', 'hull', 'ley', 'combe', 'stead', 'worth',
+  'bridge', 'vale', 'haven', 'moor', 'dale', 'shaw', 'holt', 'croft',
+  'cliff', 'holm', 'beck', 'ridge', 'grove', 'mere', 'combe', 'stead',
+  'worth', 'field', 'ford', 'gate', 'wood', 'marsh', 'heath',
 ];
 
 const NOUN_FIRST = [
-  'Iron', 'Stone', 'Oak', 'Ash', 'Crown', 'River', 'Anchor',
-  'Forge', 'Dock', 'Crest', 'Tower', 'Cinder', 'Granite', 'Ember',
-  'Thorn', 'Frost', 'Amber', 'Cobalt', 'Flint', 'Heron',
+  'Iron', 'Ash', 'Crown', 'Anchor', 'Forge', 'Crest', 'Tower', 'Cinder',
+  'Granite', 'Ember', 'Thorn', 'Frost', 'Amber', 'Cobalt', 'Flint', 'Heron',
   'Hawk', 'Raven', 'Falcon', 'Drake', 'Lark', 'Crane', 'Swift',
-  'Silver', 'Golden', 'Copper', 'Bronze', 'Scarlet', 'Crimson',
+  'Copper', 'Bronze', 'Scarlet', 'Crimson', 'Blaze', 'Gale', 'Crag',
 ];
 
 const NOUN_SECOND = [
-  'gate', 'ton', 'wick', 'bury', 'ford', 'moor', 'side',
-  'field', 'holt', 'worth', 'shaw', 'holm', 'wood', 'dale',
-  'cross', 'bridge', 'croft', 'well', 'marsh', 'vale',
+  'wick', 'holt', 'worth', 'shaw', 'holm', 'wood', 'dale',
+  'bridge', 'croft', 'well', 'marsh', 'vale', 'moor', 'ford',
+  'gate', 'field', 'stead', 'beck', 'combe', 'ridge',
 ];
 
 const SUFFIXES = [
   'FC', 'United', 'Town', 'Rovers', 'Athletic', 'Borough',
-  'City', 'Rangers', 'Wanderers', 'Vale', 'Albion', 'Orient',
-  'Dynamo', 'Sporting',
+  'Rangers', 'Wanderers', 'Albion', 'Orient',
+  'Dynamo', 'Sporting', 'Crusaders', 'Nomads',
 ];
 
 const BADGE_COLORS = [
@@ -66,7 +65,7 @@ function generateClubName(rng: () => number, usedNames: Set<string>): string {
 
     const style = Math.floor(rng() * 3);
     if (style === 0) {
-      const prefix = PLACE_PREFIXES[Math.floor(rng() * PLACE_PREFIXES.length)];
+      const prefix = FICTIONAL_PREFIXES[Math.floor(rng() * FICTIONAL_PREFIXES.length)];
       const root = PLACE_ROOTS[Math.floor(rng() * PLACE_ROOTS.length)];
       placeName = prefix + root;
     } else if (style === 1) {
@@ -74,7 +73,7 @@ function generateClubName(rng: () => number, usedNames: Set<string>): string {
       const suffix = NOUN_SECOND[Math.floor(rng() * NOUN_SECOND.length)];
       placeName = noun + suffix;
     } else {
-      const prefix = PLACE_PREFIXES[Math.floor(rng() * PLACE_PREFIXES.length)];
+      const prefix = FICTIONAL_PREFIXES[Math.floor(rng() * FICTIONAL_PREFIXES.length)];
       const noun = NOUN_FIRST[Math.floor(rng() * NOUN_FIRST.length)];
       const suffix = NOUN_SECOND[Math.floor(rng() * NOUN_SECOND.length)];
       placeName = prefix + ' ' + noun + suffix;

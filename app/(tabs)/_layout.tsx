@@ -1,30 +1,12 @@
-import { isLiquidGlassAvailable } from 'expo-glass-effect';
 import { Tabs } from 'expo-router';
-import { NativeTabs, Icon, Label } from 'expo-router/unstable-native-tabs';
 import { BlurView } from 'expo-blur';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/src/theme/ThemeProvider';
 
-function NativeTabLayout() {
-  const { t } = useTranslation();
-  return (
-    <NativeTabs>
-      <NativeTabs.Trigger name="index">
-        <Icon sf={{ default: 'map', selected: 'map.fill' }} />
-        <Label>{t('tabs.season')}</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="settings">
-        <Icon sf={{ default: 'gearshape', selected: 'gearshape.fill' }} />
-        <Label>{t('tabs.settings')}</Label>
-      </NativeTabs.Trigger>
-    </NativeTabs>
-  );
-}
-
-function ClassicTabLayout() {
+export default function TabLayout() {
   const theme = useTheme();
   const { t } = useTranslation();
   const isIOS = Platform.OS === 'ios';
@@ -35,12 +17,19 @@ function ClassicTabLayout() {
         headerShown: false,
         tabBarActiveTintColor: theme.primary,
         tabBarInactiveTintColor: '#9E9E9E',
-        tabBarStyle: {
-          position: 'absolute',
-          backgroundColor: isIOS ? 'transparent' : '#FFFFFF',
-          borderTopWidth: 0,
-          elevation: 0,
-        },
+        tabBarStyle: isIOS
+          ? {
+              position: 'absolute',
+              backgroundColor: 'transparent',
+              borderTopWidth: 0,
+              elevation: 0,
+            }
+          : {
+              backgroundColor: '#FFFFFF',
+              borderTopWidth: StyleSheet.hairlineWidth,
+              borderTopColor: '#E0E0E0',
+              elevation: 8,
+            },
         tabBarBackground: () =>
           isIOS ? (
             <BlurView
@@ -48,7 +37,7 @@ function ClassicTabLayout() {
               tint="light"
               style={StyleSheet.absoluteFill}
             />
-          ) : null,
+          ) : undefined,
         tabBarLabelStyle: {
           fontFamily: 'Inter_500Medium',
           fontSize: 11,
@@ -75,11 +64,4 @@ function ClassicTabLayout() {
       />
     </Tabs>
   );
-}
-
-export default function TabLayout() {
-  if (isLiquidGlassAvailable()) {
-    return <NativeTabLayout />;
-  }
-  return <ClassicTabLayout />;
 }
