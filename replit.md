@@ -84,6 +84,21 @@ server/
     landing-page.html      # Static landing page
 ```
 
+## In-App Purchases (IAP)
+
+IAP is currently stubbed in `src/services/stubs.ts` — `IAPService.purchasePremium()` always returns `true`. To wire up real payments with RevenueCat:
+
+1. Connect the RevenueCat integration in Replit (Settings → Integrations → RevenueCat)
+2. Run the seed script: `npx tsx scripts/seedRevenueCat.ts`
+3. Save the printed API keys to env vars:
+   - `EXPO_PUBLIC_REVENUECAT_TEST_API_KEY`
+   - `EXPO_PUBLIC_REVENUECAT_IOS_API_KEY`
+   - `EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY`
+   - `REVENUECAT_PROJECT_ID`, `REVENUECAT_TEST_STORE_APP_ID`, etc.
+4. Create `src/lib/revenuecat.tsx` from the template in `.local/skills/revenuecat/references/initial-setup.md`
+5. Initialize RevenueCat in `app/_layout.tsx` and wrap the app in `<SubscriptionProvider>`
+6. Replace `IAPService.purchasePremium()` in `app/(tabs)/settings.tsx` with `useSubscription().purchase()`
+
 ## Environment Variables
 - `EXPO_PUBLIC_SUPABASE_URL` - Supabase project URL
 - `EXPO_PUBLIC_SUPABASE_ANON_KEY` - Supabase anon key
