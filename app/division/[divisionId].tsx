@@ -5,7 +5,6 @@ import {
   Pressable,
   StyleSheet,
   FlatList,
-  Platform,
   ScrollView,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';

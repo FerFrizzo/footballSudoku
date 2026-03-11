@@ -4,7 +4,6 @@ import {
   Text,
   Pressable,
   StyleSheet,
-  Platform,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
