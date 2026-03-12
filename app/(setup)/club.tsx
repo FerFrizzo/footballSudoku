@@ -153,6 +153,7 @@ export default function ClubSetupScreen() {
             <Text style={styles.sectionHint}>{t('club.primaryColorHint')}</Text>
             <ColorPicker
               selectedColor={primaryColor}
+              disabledColor={secondaryColor}
               onSelect={(c) => {
                 setPrimaryColor(c);
                 Haptics.selectionAsync();
@@ -165,6 +166,7 @@ export default function ClubSetupScreen() {
             <Text style={styles.sectionHint}>{t('club.secondaryColorHint')}</Text>
             <ColorPicker
               selectedColor={secondaryColor}
+              disabledColor={primaryColor}
               onSelect={(c) => {
                 setSecondaryColor(c);
                 Haptics.selectionAsync();

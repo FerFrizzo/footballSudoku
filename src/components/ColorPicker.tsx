@@ -11,38 +11,46 @@ const PRESET_COLORS = [
   '#212121', '#FFFFFF', '#FFD600', '#FF6D00',
 ];
 
+const LIGHT_COLORS = new Set(['#FFFFFF', '#FFD600', '#F9A825', '#FF8F00', '#9E9D24', '#558B2F']);
+
 interface ColorPickerProps {
   selectedColor: string;
   onSelect: (color: string) => void;
+  disabledColor?: string;
 }
 
-export default function ColorPicker({ selectedColor, onSelect }: ColorPickerProps) {
+export default function ColorPicker({ selectedColor, onSelect, disabledColor }: ColorPickerProps) {
   return (
     <View style={styles.container}>
       {PRESET_COLORS.map((color) => {
         const isSelected = selectedColor.toLowerCase() === color.toLowerCase();
+        const isDisabled = !!disabledColor && disabledColor.toLowerCase() === color.toLowerCase();
         return (
           <Pressable
             key={color}
-            onPress={() => onSelect(color)}
+            onPress={() => { if (!isDisabled) onSelect(color); }}
             style={[
               styles.swatch,
               {
                 backgroundColor: color,
                 borderColor: color === '#FFFFFF' ? '#E0E0E0' : color,
                 borderWidth: isSelected ? 3 : 1,
+                opacity: isDisabled ? 0.25 : 1,
               },
             ]}
           >
-            {isSelected && (
+            {isSelected && !isDisabled && (
               <Ionicons
                 name="checkmark"
                 size={18}
-                color={
-                  ['#FFFFFF', '#FFD600', '#F9A825', '#FF8F00'].includes(color)
-                    ? '#000'
-                    : '#FFF'
-                }
+                color={LIGHT_COLORS.has(color) ? '#000' : '#FFF'}
+              />
+            )}
+            {isDisabled && (
+              <Ionicons
+                name="close"
+                size={16}
+                color={LIGHT_COLORS.has(color) ? '#000' : '#FFF'}
               />
             )}
           </Pressable>
