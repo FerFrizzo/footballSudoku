@@ -32,6 +32,8 @@ export default function SettingsScreen() {
   const soundEnabled = useGameStore((s) => s.soundEnabled);
   const gems = useGameStore((s) => s.gems);
   const language = useGameStore((s) => s.language);
+  const analyticsEnabled = useGameStore((s) => s.analyticsEnabled);
+  const setAnalyticsEnabled = useGameStore((s) => s.setAnalyticsEnabled);
   const setAutoCheck = useGameStore((s) => s.setAutoCheck);
   const setSoundEnabled = useGameStore((s) => s.setSoundEnabled);
   const setPremium = useGameStore((s) => s.setPremium);
@@ -409,6 +411,28 @@ export default function SettingsScreen() {
             </View>
             <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} />
           </Pressable>
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
+          <View style={styles.settingRow}>
+            <View style={[styles.settingLabel, { flex: 1, marginRight: 12 }]}>
+              <Ionicons name="bar-chart-outline" size={20} color={theme.text} />
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.settingText, { color: theme.text }]}>
+                  {t('settings.analyticsTracking')}
+                </Text>
+                <Text style={[styles.analyticsHint, { color: theme.textSecondary }]}>
+                  {t('settings.analyticsTrackingHint')}
+                </Text>
+              </View>
+            </View>
+            <Switch
+              value={analyticsEnabled}
+              onValueChange={(v) => {
+                setAnalyticsEnabled(v);
+                Haptics.selectionAsync();
+              }}
+              trackColor={{ false: '#E0E0E0', true: theme.primary }}
+            />
+          </View>
         </View>
 
         <View style={[styles.card, { backgroundColor: theme.surface }]}>
@@ -656,5 +680,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Inter_500Medium',
     flex: 1,
+  },
+  analyticsHint: {
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+    marginTop: 2,
   },
 });

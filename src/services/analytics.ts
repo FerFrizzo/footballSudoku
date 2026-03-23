@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import { supabase, isSupabaseConfigured } from './supabase';
+import { useGameStore } from '../state/gameStore';
 import type { AnalyticsEvent } from '../types';
 
 const QUEUE_KEY = 'analytics_queue';
@@ -11,6 +12,8 @@ export async function trackEvent(
   userId?: string | null,
   deviceId?: string
 ): Promise<void> {
+  if (!useGameStore.getState().analyticsEnabled) return;
+
   const event: AnalyticsEvent & { userId?: string | null; deviceId?: string } = {
     eventName,
     payload,

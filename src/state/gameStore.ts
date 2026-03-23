@@ -25,6 +25,7 @@ interface GameState {
   autoCheck: boolean;
   soundEnabled: boolean;
   isPremium: boolean;
+  analyticsEnabled: boolean;
   freeHintsUsed: Record<string, boolean>;
   language: string;
   _hasHydrated: boolean;
@@ -47,6 +48,7 @@ interface GameState {
   setAutoCheck: (v: boolean) => void;
   setSoundEnabled: (v: boolean) => void;
   setPremium: (v: boolean) => void;
+  setAnalyticsEnabled: (v: boolean) => void;
   resetProgress: () => void;
   getTotalStars: () => number;
   getDivisionStars: (divisionId: string) => number;
@@ -72,6 +74,7 @@ export const useGameStore = create<GameState>()(
       autoCheck: false,
       soundEnabled: true,
       isPremium: false,
+      analyticsEnabled: true,
       freeHintsUsed: {},
       language: 'en',
       _hasHydrated: false,
@@ -248,6 +251,7 @@ export const useGameStore = create<GameState>()(
       setAutoCheck: (v) => set({ autoCheck: v }),
       setSoundEnabled: (v) => set({ soundEnabled: v }),
       setPremium: (v) => set({ isPremium: v }),
+      setAnalyticsEnabled: (v) => set({ analyticsEnabled: v }),
 
       resetProgress: () =>
         set({
@@ -338,6 +342,7 @@ export const useGameStore = create<GameState>()(
         autoCheck: state.autoCheck,
         soundEnabled: state.soundEnabled,
         isPremium: state.isPremium,
+        analyticsEnabled: state.analyticsEnabled,
         freeHintsUsed: state.freeHintsUsed,
         language: state.language,
       }),

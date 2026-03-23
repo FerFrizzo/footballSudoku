@@ -115,6 +115,8 @@ export default {
     privacyPolicy: 'Datenschutzrichtlinie',
     termsOfService: 'Nutzungsbedingungen',
     manageSubscription: 'Abonnement verwalten',
+    analyticsTracking: 'Analysen',
+    analyticsTrackingHint: 'Hilf dabei, das Spiel durch anonyme Nutzungsdaten zu verbessern',
   },
   about: {
     title: 'Über',
