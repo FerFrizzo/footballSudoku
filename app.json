@@ -46,7 +46,8 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-tracking-transparency"
+      "expo-tracking-transparency",
+      "./plugins/withPrivacyManifest"
     ],
     "experiments": {
       "typedRoutes": true,
