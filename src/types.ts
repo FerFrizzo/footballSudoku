@@ -246,6 +246,6 @@ export const RELEGATION_DIALOGUES: Record<string, string> = {
   '10': "RELEGATED. The Grassroots Division. Rock bottom, but the only way is up. Start again.",
 };
 
-export const HINT_COST_GEMS = 10;
-export const FREE_HINTS_PER_LEVEL = 1;
+export const HINT_COST_GEMS = 50;
+export const FREE_HINTS_PER_LEVEL = 0;
 export const PREMIUM_HINTS_PER_LEVEL = 99;

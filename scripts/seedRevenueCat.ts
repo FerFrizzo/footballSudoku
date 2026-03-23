@@ -24,7 +24,7 @@ import {
   type Offering,
   type Package,
   type CreateProductData,
-} from 'replit-revenuecat-v2';
+} from 'revenuecat-api-v2';
 
 const PROJECT_NAME = 'Football Sudoku';
 
@@ -50,9 +50,9 @@ const PACKAGE_IDENTIFIER = '$rc_monthly';
 const PACKAGE_DISPLAY_NAME = 'Monthly Subscription';
 
 const PRODUCT_PRICES = [
-  { amount_micros: 2990000, currency: 'USD' },
-  { amount_micros: 2990000, currency: 'EUR' },
-  { amount_micros: 2990000, currency: 'GBP' },
+  { amount_micros: 990000, currency: 'USD' },
+  { amount_micros: 990000, currency: 'EUR' },
+  { amount_micros: 990000, currency: 'GBP' },
 ];
 
 type TestStorePricesResponse = {

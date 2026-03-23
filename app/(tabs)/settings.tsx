@@ -35,15 +35,16 @@ export default function SettingsScreen() {
   const setPremium = useGameStore((s) => s.setPremium);
   const resetProgress = useGameStore((s) => s.resetProgress);
   const logout = useGameStore((s) => s.logout);
+  const deleteAccount = useGameStore((s) => s.deleteAccount);
   const setLanguage = useGameStore((s) => s.setLanguage);
   const getTotalStars = useGameStore((s) => s.getTotalStars);
 
-  const { isSubscribed, offerings, purchase, isPurchasing } = useSubscription();
+  const { isSubscribed, offerings, purchase, isPurchasing, restore, isRestoring } = useSubscription();
   const isPremium = useGameStore((s) => s.isPremium) || isSubscribed;
 
   const currentOffering = offerings?.current;
   const packageToPurchase = currentOffering?.availablePackages[0];
-  const priceString = packageToPurchase?.product.priceString || '$2.99';
+  const priceString = packageToPurchase?.product.priceString || t('settings.priceMonthly');
 
   async function handlePurchase() {
     if (!packageToPurchase) {
@@ -58,6 +59,21 @@ export default function SettingsScreen() {
     } catch (e: any) {
       if (e?.userCancelled) return;
       Alert.alert(t('settings.error'), t('settings.purchaseFailed'));
+    }
+  }
+
+  async function handleRestore() {
+    try {
+      await restore();
+      if (isSubscribed) {
+        setPremium(true);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Alert.alert(t('settings.welcomePremium'), t('settings.premiumUnlocked'));
+      } else {
+        Alert.alert(t('settings.restoreTitle'), t('settings.restoreNotFound'));
+      }
+    } catch {
+      Alert.alert(t('settings.error'), t('settings.restoreFailed'));
     }
   }
 
@@ -84,6 +100,32 @@ export default function SettingsScreen() {
       await supabase.auth.signOut();
     }
     logout();
+  }
+
+  function handleDeleteAccount() {
+    Alert.alert(
+      t('settings.deleteAccountTitle'),
+      t('settings.deleteAccountMessage'),
+      [
+        { text: t('settings.cancel'), style: 'cancel' },
+        {
+          text: t('settings.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              if (isSupabaseConfigured && supabase) {
+                const { error } = await supabase.functions.invoke('delete-account');
+                if (error) throw error;
+                await supabase.auth.signOut();
+              }
+              deleteAccount();
+            } catch {
+              Alert.alert(t('settings.error'), t('settings.deleteAccountFailed'));
+            }
+          },
+        },
+      ]
+    );
   }
 
   return (
@@ -214,6 +256,23 @@ export default function SettingsScreen() {
               {t('settings.premiumActive')}
             </Text>
           </View>
+        )}
+
+        {!isPremium && (
+          <Pressable
+            onPress={handleRestore}
+            disabled={isRestoring}
+            style={({ pressed }) => [
+              styles.restoreBtn,
+              {
+                opacity: isRestoring ? 0.7 : pressed ? 0.8 : 1,
+              },
+            ]}
+          >
+            <Text style={[styles.restoreBtnText, { color: theme.textSecondary }]}>
+              {isRestoring ? t('settings.restoring') : t('settings.restorePurchases')}
+            </Text>
+          </Pressable>
         )}
 
         <View style={[styles.card, { backgroundColor: theme.surface }]}>
@@ -363,6 +422,25 @@ export default function SettingsScreen() {
               </Text>
             </View>
           </Pressable>
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
+          <Pressable
+            onPress={handleDeleteAccount}
+            style={({ pressed }) => [
+              styles.settingRow,
+              { opacity: pressed ? 0.7 : 1 },
+            ]}
+          >
+            <View style={styles.settingLabel}>
+              <Ionicons
+                name="trash-outline"
+                size={20}
+                color={theme.error}
+              />
+              <Text style={[styles.settingText, { color: theme.error }]}>
+                {t('settings.deleteAccount')}
+              </Text>
+            </View>
+          </Pressable>
         </View>
       </ScrollView>
     </View>
@@ -469,6 +547,15 @@ const styles = StyleSheet.create({
   premiumBadgeText: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
+  },
+  restoreBtn: {
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  restoreBtnText: {
+    fontSize: 13,
+    fontFamily: 'Inter_500Medium',
+    textDecorationLine: 'underline',
   },
   sectionLabel: {
     fontSize: 12,

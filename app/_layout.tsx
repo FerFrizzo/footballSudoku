@@ -14,8 +14,8 @@ import {
 } from '@expo-google-fonts/inter';
 import { Ionicons } from '@expo/vector-icons';
 
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { queryClient } from '@/lib/query-client';
+import { ErrorBoundary } from '@/src/components/ErrorBoundary';
+import { queryClient } from '@/src/lib/query-client';
 import { ThemeProvider } from '@/src/theme/ThemeProvider';
 import { useGameStore } from '@/src/state/gameStore';
 import { supabase, isSupabaseConfigured } from '@/src/services/supabase';
@@ -26,12 +26,23 @@ import '@/src/i18n';
 SplashScreen.preventAutoHideAsync();
 initializeRevenueCat();
 
+const HYDRATION_TIMEOUT_MS = 5000;
+
 function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const segments = useSegments();
   const isAuthenticated = useGameStore((s) => s.isAuthenticated);
   const hasClub = useGameStore((s) => !!s.club);
   const hasHydrated = useGameStore((s) => s._hasHydrated);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (!useGameStore.getState()._hasHydrated) {
+        useGameStore.getState().forceHydrationComplete();
+      }
+    }, HYDRATION_TIMEOUT_MS);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     if (!hasHydrated) return;
@@ -102,22 +113,27 @@ export default function RootLayout() {
   const [sessionChecked, setSessionChecked] = useState(false);
 
   useEffect(() => {
+    const SESSION_CHECK_TIMEOUT_MS = 5000;
+
     async function checkSession() {
-      if (isSupabaseConfigured && supabase) {
-        try {
-          const {
-            data: { session },
-          } = await supabase.auth.getSession();
-          if (session) {
+      try {
+        if (isSupabaseConfigured && supabase) {
+          const sessionPromise = supabase.auth.getSession();
+          const timeoutPromise = new Promise<null>((resolve) =>
+            setTimeout(() => resolve(null), SESSION_CHECK_TIMEOUT_MS)
+          );
+          const result = await Promise.race([sessionPromise, timeoutPromise]);
+          if (result?.data?.session) {
             useGameStore
               .getState()
-              .setAuthenticated(true, session.user.id);
+              .setAuthenticated(true, result.data.session.user.id);
           }
-        } catch (e) {
-          console.warn('Session check failed:', e);
         }
+      } catch (e) {
+        console.warn('Session check failed:', e);
+      } finally {
+        setSessionChecked(true);
       }
-      setSessionChecked(true);
     }
     checkSession();
   }, []);

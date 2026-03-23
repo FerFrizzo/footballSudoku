@@ -1,5 +1,10 @@
-import React, { memo } from 'react';
+import React, { memo, useLayoutEffect } from 'react';
 import { View, Text, Pressable, StyleSheet, Dimensions } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
 
 const screenWidth = Dimensions.get('window').width;
@@ -19,6 +24,7 @@ interface CellProps {
   isSameNumber: boolean;
   isConflict: boolean;
   isError: boolean;
+  isRecentlyFilled?: boolean;
   onPress: (row: number, col: number) => void;
   theme: ReturnType<typeof useTheme>;
 }
@@ -34,9 +40,27 @@ const Cell = memo(function Cell({
   isSameNumber,
   isConflict,
   isError,
+  isRecentlyFilled,
   onPress,
   theme,
 }: CellProps) {
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
+
+  useLayoutEffect(() => {
+    if (isRecentlyFilled) {
+      scale.value = 0.3;
+      opacity.value = 0;
+      scale.value = withSpring(1, { damping: 14, stiffness: 180 });
+      opacity.value = withSpring(1);
+    }
+  }, [isRecentlyFilled, scale, opacity]);
+
+  const animatedContentStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
+
   let bgColor = theme.surface;
   if (isSelected) bgColor = theme.cellSelected;
   else if (isSameNumber && value > 0) bgColor = theme.cellSameNumber;
@@ -75,18 +99,20 @@ const Cell = memo(function Cell({
       testID={`cell-${row}-${col}`}
     >
       {value > 0 ? (
-        <Text
-          style={[
-            styles.cellText,
-            {
-              color: textColor,
-              fontWeight: isGiven ? '700' : '500',
-              fontSize: CELL_SIZE * 0.5,
-            },
-          ]}
-        >
-          {value}
-        </Text>
+        <Animated.View style={[styles.cellContent, animatedContentStyle]}>
+          <Text
+            style={[
+              styles.cellText,
+              {
+                color: textColor,
+                fontWeight: isGiven ? '700' : '500',
+                fontSize: CELL_SIZE * 0.5,
+              },
+            ]}
+          >
+            {value}
+          </Text>
+        </Animated.View>
       ) : notes.length > 0 ? (
         <View style={styles.notesContainer}>
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
@@ -119,6 +145,7 @@ interface SudokuGridProps {
   selectedCol: number;
   conflicts: boolean[][];
   errors: boolean[][];
+  recentlyFilledCells?: string[];
   onCellPress: (row: number, col: number) => void;
 }
 
@@ -130,10 +157,12 @@ export default function SudokuGrid({
   selectedCol,
   conflicts,
   errors,
+  recentlyFilledCells = [],
   onCellPress,
 }: SudokuGridProps) {
   const theme = useTheme();
   const selectedValue = selectedRow >= 0 ? board[selectedRow][selectedCol] : 0;
+  const recentlyFilledSet = new Set(recentlyFilledCells);
 
   return (
     <View
@@ -158,6 +187,7 @@ export default function SudokuGrid({
                   Math.floor(c / 3) === Math.floor(selectedCol / 3)));
             const isSameNumber =
               !isSelected && selectedValue > 0 && val === selectedValue;
+            const isRecentlyFilled = recentlyFilledSet.has(`${r}-${c}`);
 
             return (
               <Cell
@@ -172,6 +202,7 @@ export default function SudokuGrid({
                 isSameNumber={!!isSameNumber}
                 isConflict={conflicts[r][c]}
                 isError={errors[r][c]}
+                isRecentlyFilled={isRecentlyFilled}
                 onPress={onCellPress}
                 theme={theme}
               />
@@ -194,6 +225,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   cell: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cellContent: {
     alignItems: 'center',
     justifyContent: 'center',
   },

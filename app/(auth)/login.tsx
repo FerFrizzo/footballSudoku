@@ -5,7 +5,6 @@ import {
   TextInput,
   Pressable,
   StyleSheet,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -14,11 +13,15 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 import { useTranslation } from 'react-i18next';
 
 import { supabase, isSupabaseConfigured } from '@/src/services/supabase';
 import { useGameStore } from '@/src/state/gameStore';
 import { trackEvent } from '@/src/services/analytics';
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
@@ -103,6 +106,67 @@ export default function LoginScreen() {
         null,
         deviceId
       );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    if (!isSupabaseConfigured || !supabase) {
+      await trackEvent('login_success', { method: 'dev_bypass' }, 'dev-user', deviceId);
+      setAuthenticated(true, 'dev-user');
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      return;
+    }
+
+    setError('');
+    setLoading(true);
+
+    try {
+      const redirectUrl = Linking.createURL('/');
+
+      const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: redirectUrl, skipBrowserRedirect: true },
+      });
+
+      if (oauthError || !data.url) throw oauthError || new Error('No OAuth URL');
+
+      const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
+
+      if (result.type === 'success') {
+        const hashParams = new URLSearchParams(result.url.split('#')[1] ?? '');
+        const queryParams = new URLSearchParams(result.url.split('?')[1]?.split('#')[0] ?? '');
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        const code = queryParams.get('code');
+
+        let sessionData: any, sessionError: any;
+        if (code) {
+          ({ data: sessionData, error: sessionError } =
+            await supabase.auth.exchangeCodeForSession(result.url));
+        } else if (accessToken && refreshToken) {
+          ({ data: sessionData, error: sessionError } =
+            await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }));
+        } else {
+          throw new Error('No auth code or tokens in callback URL');
+        }
+
+        if (sessionError) throw sessionError;
+        if (sessionData.session) {
+          await trackEvent(
+            'login_success',
+            { method: 'google' },
+            sessionData.session.user.id,
+            deviceId
+          );
+          setAuthenticated(true, sessionData.session.user.id);
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
+      }
+    } catch (e: any) {
+      setError(e.message || t('auth.errorFailed'));
+      await trackEvent('login_failure', { method: 'google', error: e.message }, null, deviceId);
     } finally {
       setLoading(false);
     }
@@ -208,6 +272,24 @@ export default function LoginScreen() {
               {isSignUp ? t('auth.alreadyHaveAccount') : t('auth.noAccount')}
             </Text>
           </Pressable>
+
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>{t('auth.or')}</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <Pressable
+            onPress={handleGoogleSignIn}
+            disabled={loading}
+            style={({ pressed }) => [
+              styles.googleBtn,
+              { opacity: loading ? 0.7 : pressed ? 0.9 : 1, transform: [{ scale: pressed ? 0.98 : 1 }] },
+            ]}
+          >
+            <Ionicons name="logo-google" size={20} color="#1B5E20" />
+            <Text style={styles.googleBtnText}>{t('auth.signInWithGoogle')}</Text>
+          </Pressable>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -307,6 +389,37 @@ const styles = StyleSheet.create({
   toggleText: {
     fontSize: 14,
     fontFamily: 'Inter_500Medium',
+    color: '#1B5E20',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E0E0E0',
+  },
+  dividerText: {
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    color: '#9E9E9E',
+  },
+  googleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    paddingVertical: 14,
+    borderRadius: 14,
+  },
+  googleBtnText: {
+    fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
     color: '#1B5E20',
   },
 });

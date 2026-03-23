@@ -93,6 +93,7 @@ export default function MatchdayScreen() {
     pointsEarned: 0,
   });
   const [autoCompleting, setAutoCompleting] = useState(false);
+  const [recentlyFilledCells, setRecentlyFilledCells] = useState<string[]>([]);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isCompleteRef = useRef(false);
@@ -225,21 +226,31 @@ export default function MatchdayScreen() {
       setAutoCompleting(true);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
+      const AUTO_FILL_DELAY_MS = 140;
+      const FILL_ANIMATION_DURATION_MS = 500;
+
       emptyCells.forEach(([r, c], idx) => {
         setTimeout(() => {
+          const cellKey = `${r}-${c}`;
+          setRecentlyFilledCells((prev) => [...prev, cellKey]);
           setBoard((prev) => {
             const b = prev.map((row) => [...row]);
             b[r][c] = solution[r][c];
             return b;
           });
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+          setTimeout(() => {
+            setRecentlyFilledCells((prev) => prev.filter((k) => k !== cellKey));
+          }, FILL_ANIMATION_DURATION_MS);
+
           if (idx === emptyCells.length - 1) {
             setTimeout(() => {
               setAutoCompleting(false);
               triggerEnd(undefined, currentMistakes);
             }, 250);
           }
-        }, idx * 140);
+        }, idx * AUTO_FILL_DELAY_MS);
       });
     },
     [solution, triggerEnd]
@@ -570,6 +581,7 @@ export default function MatchdayScreen() {
           conflicts={conflicts}
           errors={errors}
           onCellPress={handleCellPress}
+          recentlyFilledCells={recentlyFilledCells}
         />
       </View>
 

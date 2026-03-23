@@ -3,6 +3,7 @@ import { initReactI18next } from 'react-i18next';
 
 import en from './locales/en';
 import ptBR from './locales/pt-BR';
+import ptPT from './locales/pt-PT';
 import it from './locales/it';
 import es from './locales/es';
 import fr from './locales/fr';
@@ -12,6 +13,7 @@ import pl from './locales/pl';
 export const SUPPORTED_LANGUAGES = [
   { code: 'en', flag: '🇬🇧', nativeName: 'English' },
   { code: 'pt-BR', flag: '🇧🇷', nativeName: 'Português (Brasil)' },
+  { code: 'pt-PT', flag: '🇵🇹', nativeName: 'Português (Portugal)' },
   { code: 'it', flag: '🇮🇹', nativeName: 'Italiano' },
   { code: 'es', flag: '🇪🇸', nativeName: 'Español' },
   { code: 'fr', flag: '🇫🇷', nativeName: 'Français' },
@@ -25,6 +27,7 @@ i18n.use(initReactI18next).init({
   resources: {
     en: { translation: en },
     'pt-BR': { translation: ptBR },
+    'pt-PT': { translation: ptPT },
     it: { translation: it },
     es: { translation: es },
     fr: { translation: fr },
@@ -36,7 +39,7 @@ i18n.use(initReactI18next).init({
   interpolation: {
     escapeValue: false,
   },
-  compatibilityJSON: 'v3',
+  compatibilityJSON: 'v4',
 });
 
 export function changeLanguage(code: string) {

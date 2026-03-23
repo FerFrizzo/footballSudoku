@@ -55,6 +55,9 @@ interface GameState {
   getMatchdayProgress: (divisionId: string, matchdayIndex: number) => MatchdayProgress | null;
   getLeagueTable: (divisionId: string) => DivisionLeague['teams'];
   logout: () => void;
+  deleteAccount: () => void;
+  /** Call if persist hydration is slow (e.g. Android emulator) so the app doesn't hang. */
+  forceHydrationComplete: () => void;
 }
 
 export const useGameStore = create<GameState>()(
@@ -308,6 +311,19 @@ export const useGameStore = create<GameState>()(
           isAuthenticated: false,
           supabaseUserId: null,
         }),
+
+      deleteAccount: () =>
+        set({
+          isAuthenticated: false,
+          supabaseUserId: null,
+          club: null,
+          leagueProgress: {},
+          gems: 0,
+          freeHintsUsed: {},
+          isPremium: false,
+        }),
+
+      forceHydrationComplete: () => set({ _hasHydrated: true }),
     }),
     {
       name: 'sudoku-game-storage',

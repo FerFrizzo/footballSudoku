@@ -39,3 +39,10 @@ yarn-error.*
 .vercel
 
 .env
+
+# Tool/editor artifacts
+.cache/
+.claude/
+.local/
+.upm/
+.vscode/
