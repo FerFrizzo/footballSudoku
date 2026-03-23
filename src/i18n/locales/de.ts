@@ -111,6 +111,10 @@ export default {
     deleteAccountMessage: 'Dies löscht dauerhaft dein Konto und alle Daten. Kann nicht rückgängig gemacht werden.',
     delete: 'Löschen',
     deleteAccountFailed: 'Konto konnte nicht gelöscht werden. Bitte versuche es erneut.',
+    legal: 'Rechtliches',
+    privacyPolicy: 'Datenschutzrichtlinie',
+    termsOfService: 'Nutzungsbedingungen',
+    manageSubscription: 'Abonnement verwalten',
   },
   about: {
     title: 'Über',

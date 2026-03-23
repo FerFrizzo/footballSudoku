@@ -111,6 +111,10 @@ export default {
     deleteAccountMessage: "Questo eliminerà permanentemente il tuo account e tutti i dati. Non è reversibile.",
     delete: 'Elimina',
     deleteAccountFailed: "Impossibile eliminare l'account. Riprova.",
+    legal: 'Legale',
+    privacyPolicy: 'Informativa sulla privacy',
+    termsOfService: 'Termini di servizio',
+    manageSubscription: 'Gestisci abbonamento',
   },
   about: {
     title: 'Informazioni',

@@ -111,6 +111,10 @@ export default {
     deleteAccountMessage: 'To trwale usunie twoje konto i wszystkie dane. Nie można cofnąć.',
     delete: 'Usuń',
     deleteAccountFailed: 'Nie udało się usunąć konta. Spróbuj ponownie.',
+    legal: 'Prawne',
+    privacyPolicy: 'Polityka prywatności',
+    termsOfService: 'Warunki korzystania',
+    manageSubscription: 'Zarządzaj subskrypcją',
   },
   about: {
     title: 'O grze',

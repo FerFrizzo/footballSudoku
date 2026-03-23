@@ -111,6 +111,10 @@ export default {
     deleteAccountMessage: 'Cela supprimera définitivement votre compte et toutes les données. Irréversible.',
     delete: 'Supprimer',
     deleteAccountFailed: 'Échec de la suppression du compte. Veuillez réessayer.',
+    legal: 'Légal',
+    privacyPolicy: 'Politique de confidentialité',
+    termsOfService: "Conditions d'utilisation",
+    manageSubscription: "Gérer l'abonnement",
   },
   about: {
     title: 'À propos',

@@ -12,7 +12,8 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.footballsudoku.app",
       "infoPlist": {
-        "NSUserTrackingUsageDescription": "We use your advertising identifier to show you relevant ads and measure ad performance. You can change this at any time in your device settings."
+        "NSUserTrackingUsageDescription": "We use your advertising identifier to show you relevant ads and measure ad performance. You can change this at any time in your device settings.",
+        "NSPhotoLibraryUsageDescription": "Allow access to your photo library to set a custom badge for your club."
       }
     },
     "android": {

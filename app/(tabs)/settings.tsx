@@ -8,6 +8,8 @@ import {
   Switch,
   Alert,
   Image,
+  Linking,
+  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -258,6 +260,23 @@ export default function SettingsScreen() {
           </View>
         )}
 
+        {isPremium && (
+          <Pressable
+            onPress={() =>
+              Linking.openURL(
+                Platform.OS === 'ios'
+                  ? 'https://apps.apple.com/account/subscriptions'
+                  : 'https://play.google.com/store/account/subscriptions'
+              )
+            }
+            style={({ pressed }) => [styles.restoreBtn, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <Text style={[styles.restoreBtnText, { color: theme.textSecondary }]}>
+              {t('settings.manageSubscription')}
+            </Text>
+          </Pressable>
+        )}
+
         {!isPremium && (
           <Pressable
             onPress={handleRestore}
@@ -359,6 +378,37 @@ export default function SettingsScreen() {
               );
             })}
           </View>
+        </View>
+
+        <View style={[styles.card, { backgroundColor: theme.surface }]}>
+          <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>
+            {t('settings.legal')}
+          </Text>
+          <Pressable
+            onPress={() => Linking.openURL('https://ferfrizzo.github.io/footballSudoku/privacy-policy.html')}
+            style={({ pressed }) => [styles.settingRow, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <View style={styles.settingLabel}>
+              <Ionicons name="shield-checkmark-outline" size={20} color={theme.text} />
+              <Text style={[styles.settingText, { color: theme.text }]}>
+                {t('settings.privacyPolicy')}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} />
+          </Pressable>
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
+          <Pressable
+            onPress={() => Linking.openURL('https://ferfrizzo.github.io/footballSudoku/terms-of-service.html')}
+            style={({ pressed }) => [styles.settingRow, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <View style={styles.settingLabel}>
+              <Ionicons name="document-text-outline" size={20} color={theme.text} />
+              <Text style={[styles.settingText, { color: theme.text }]}>
+                {t('settings.termsOfService')}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} />
+          </Pressable>
         </View>
 
         <View style={[styles.card, { backgroundColor: theme.surface }]}>

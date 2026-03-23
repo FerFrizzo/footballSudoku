@@ -111,6 +111,10 @@ export default {
     deleteAccountMessage: 'Isto eliminará permanentemente a sua conta e todos os dados. Não é possível desfazer.',
     delete: 'Eliminar',
     deleteAccountFailed: 'Falha ao eliminar a conta. Por favor, tente novamente.',
+    legal: 'Legal',
+    privacyPolicy: 'Política de privacidade',
+    termsOfService: 'Termos de serviço',
+    manageSubscription: 'Gerir subscrição',
   },
   about: {
     title: 'Sobre',

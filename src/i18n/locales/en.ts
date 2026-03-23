@@ -111,6 +111,10 @@ export default {
     deleteAccountMessage: 'This will permanently delete your account and all data. This cannot be undone.',
     delete: 'Delete',
     deleteAccountFailed: 'Failed to delete account. Please try again.',
+    legal: 'Legal',
+    privacyPolicy: 'Privacy Policy',
+    termsOfService: 'Terms of Service',
+    manageSubscription: 'Manage Subscription',
   },
   about: {
     title: 'About',
