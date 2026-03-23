@@ -26,6 +26,7 @@ interface GameState {
   soundEnabled: boolean;
   isPremium: boolean;
   analyticsEnabled: boolean;
+  gamesCompletedSinceLastAd: number;
   freeHintsUsed: Record<string, boolean>;
   language: string;
   _hasHydrated: boolean;
@@ -49,6 +50,7 @@ interface GameState {
   setSoundEnabled: (v: boolean) => void;
   setPremium: (v: boolean) => void;
   setAnalyticsEnabled: (v: boolean) => void;
+  incrementGamesCompleted: () => boolean;
   resetProgress: () => void;
   getTotalStars: () => number;
   getDivisionStars: (divisionId: string) => number;
@@ -75,6 +77,7 @@ export const useGameStore = create<GameState>()(
       soundEnabled: true,
       isPremium: false,
       analyticsEnabled: true,
+      gamesCompletedSinceLastAd: 0,
       freeHintsUsed: {},
       language: 'en',
       _hasHydrated: false,
@@ -253,6 +256,16 @@ export const useGameStore = create<GameState>()(
       setPremium: (v) => set({ isPremium: v }),
       setAnalyticsEnabled: (v) => set({ analyticsEnabled: v }),
 
+      incrementGamesCompleted: () => {
+        const next = get().gamesCompletedSinceLastAd + 1;
+        if (next >= 2) {
+          set({ gamesCompletedSinceLastAd: 0 });
+          return true;
+        }
+        set({ gamesCompletedSinceLastAd: next });
+        return false;
+      },
+
       resetProgress: () =>
         set({
           leagueProgress: {},
@@ -343,6 +356,7 @@ export const useGameStore = create<GameState>()(
         soundEnabled: state.soundEnabled,
         isPremium: state.isPremium,
         analyticsEnabled: state.analyticsEnabled,
+        gamesCompletedSinceLastAd: state.gamesCompletedSinceLastAd,
         freeHintsUsed: state.freeHintsUsed,
         language: state.language,
       }),

@@ -1,10 +1,7 @@
-import { trackEvent } from './analytics';
+import { showInterstitialIfDue } from '../lib/ads';
 
 export const AdsService = {
-  async showInterstitial(userId?: string | null, deviceId?: string): Promise<void> {
-    await trackEvent('ad_interstitial_shown', {}, userId, deviceId);
-    return new Promise((resolve) => setTimeout(resolve, 1500));
-  },
+  showInterstitial: showInterstitialIfDue,
 };
 
 export const IAPService = {

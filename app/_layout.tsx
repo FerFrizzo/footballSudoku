@@ -22,10 +22,12 @@ import { useGameStore } from '@/src/state/gameStore';
 import { supabase, isSupabaseConfigured } from '@/src/services/supabase';
 import { trackEvent, flushQueue } from '@/src/services/analytics';
 import { initializeRevenueCat, SubscriptionProvider } from '@/src/lib/revenuecat';
+import { initializeAds } from '@/src/lib/ads';
 import '@/src/i18n';
 
 SplashScreen.preventAutoHideAsync();
 initializeRevenueCat();
+initializeAds();
 
 const HYDRATION_TIMEOUT_MS = 5000;
 
