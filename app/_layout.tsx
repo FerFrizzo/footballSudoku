@@ -4,7 +4,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
+import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
 import {
   useFonts,
   Inter_400Regular,
@@ -141,6 +142,9 @@ export default function RootLayout() {
   useEffect(() => {
     if ((fontsLoaded || fontError) && sessionChecked) {
       SplashScreen.hideAsync();
+      if (Platform.OS === 'ios') {
+        requestTrackingPermissionsAsync();
+      }
       const deviceId = useGameStore.getState().deviceId;
       trackEvent('app_open', {}, useGameStore.getState().supabaseUserId, deviceId);
       flushQueue();
