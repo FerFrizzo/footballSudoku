@@ -211,16 +211,16 @@ const styles = StyleSheet.create({
   },
   numbers: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 6,
+    justifyContent: 'space-between',
   },
   numBtn: {
-    width: 36,
+    flex: 1,
     height: 52,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
+    marginHorizontal: 3,
   },
   numBtnInner: {
     alignItems: 'center',
