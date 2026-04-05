@@ -7,9 +7,16 @@
   <key>NSPrivacyTracking</key>
   <true/>
 
-  <!-- Domains involved in tracking (populated by AdMob SDK at build time; declare empty for now) -->
+  <!-- Domains used for tracking via Google AdMob -->
   <key>NSPrivacyTrackingDomains</key>
-  <array/>
+  <array>
+    <string>googleadservices.com</string>
+    <string>googlesyndication.com</string>
+    <string>doubleclick.net</string>
+    <string>google-analytics.com</string>
+    <string>app-measurement.com</string>
+    <string>googletagmanager.com</string>
+  </array>
 
   <!-- Required-reason APIs used by the app -->
   <key>NSPrivacyAccessedAPITypes</key>

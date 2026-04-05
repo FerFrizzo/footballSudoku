@@ -43,7 +43,7 @@ export default function SettingsScreen() {
   const setLanguage = useGameStore((s) => s.setLanguage);
   const getTotalStars = useGameStore((s) => s.getTotalStars);
 
-  const { isSubscribed, offerings, purchase, isPurchasing, restore, isRestoring } = useSubscription();
+  const { isSubscribed, offerings, purchase, isPurchasing, restore, isRestoring, isLoading } = useSubscription();
   const isPremium = useGameStore((s) => s.isPremium) || isSubscribed;
 
   const currentOffering = offerings?.current;
@@ -51,6 +51,7 @@ export default function SettingsScreen() {
   const priceString = packageToPurchase?.product.priceString || t('settings.priceMonthly');
 
   async function handlePurchase() {
+    if (isLoading) return;
     if (!packageToPurchase) {
       Alert.alert(t('settings.error'), t('settings.purchaseFailed'));
       return;
@@ -216,7 +217,7 @@ export default function SettingsScreen() {
         {!isPremium && (
           <Pressable
             onPress={handlePurchase}
-            disabled={isPurchasing}
+            disabled={isPurchasing || isLoading}
             style={({ pressed }) => [
               styles.premiumCard,
               {

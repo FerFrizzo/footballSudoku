@@ -34,6 +34,9 @@ yarn-error.*
 # local env files
 .env*.local
 
+# Supabase CLI temp files (contain project ref, pooler URL, etc.)
+supabase/.temp/
+
 # Google Play service account key (sensitive — never commit)
 google-play-service-account.json
 
@@ -49,3 +52,7 @@ google-play-service-account.json
 .local/
 .upm/
 .vscode/
+
+football_sudoku_gtm.docx
+patches/
+CLAUDE.md

@@ -10,6 +10,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -106,6 +107,47 @@ export default function LoginScreen() {
         null,
         deviceId
       );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleAppleSignIn() {
+    if (!isSupabaseConfigured || !supabase) {
+      await trackEvent('login_success', { method: 'dev_bypass' }, 'dev-user', deviceId);
+      setAuthenticated(true, 'dev-user');
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      return;
+    }
+
+    setError('');
+    setLoading(true);
+
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      const { data, error: signInError } = await supabase.auth.signInWithIdToken({
+        provider: 'apple',
+        token: credential.identityToken!,
+      });
+      if (signInError) throw signInError;
+      if (data.user) {
+        await trackEvent('login_success', { method: 'apple' }, data.user.id, deviceId);
+        setAuthenticated(true, data.user.id);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    } catch (e: any) {
+      if (e.code === 'ERR_REQUEST_CANCELED') {
+        // user dismissed the Apple sheet — not an error
+      } else {
+        setError(e.message || t('auth.errorFailed'));
+        await trackEvent('login_failure', { method: 'apple', error: e.message }, null, deviceId);
+      }
     } finally {
       setLoading(false);
     }
@@ -290,6 +332,16 @@ export default function LoginScreen() {
             <Ionicons name="logo-google" size={20} color="#1B5E20" />
             <Text style={styles.googleBtnText}>{t('auth.signInWithGoogle')}</Text>
           </Pressable>
+
+          {Platform.OS === 'ios' && (
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+              cornerRadius={14}
+              style={styles.appleBtn}
+              onPress={handleAppleSignIn}
+            />
+          )}
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -421,5 +473,9 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'Inter_600SemiBold',
     color: '#1B5E20',
+  },
+  appleBtn: {
+    width: '100%',
+    height: 50,
   },
 });

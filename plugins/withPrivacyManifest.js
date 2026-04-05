@@ -1,15 +1,16 @@
-const { withXcodeProject } = require('@expo/config-plugins');
+const { withDangerousMod } = require('@expo/config-plugins');
 const path = require('path');
 const fs = require('fs');
 
 /**
- * Config plugin that copies PrivacyInfo.xcprivacy into the iOS app target
- * and registers it as a resource in the Xcode project.
+ * Config plugin that copies PrivacyInfo.xcprivacy into the iOS app target directory.
+ * Registration in the Xcode project is handled by React Native's CocoaPods
+ * post-install hook (privacy_manifest_utils.rb / ensure_reference).
  *
  * Required for iOS 17+ / App Store notarization.
  */
 const withPrivacyManifest = (config) => {
-  return withXcodeProject(config, (config) => {
+  return withDangerousMod(config, ['ios', (config) => {
     const projectRoot = config.modRequest.projectRoot;
     const platformRoot = config.modRequest.platformProjectRoot;
     const projectName = config.modRequest.projectName;
@@ -26,26 +27,8 @@ const withPrivacyManifest = (config) => {
     fs.mkdirSync(destDir, { recursive: true });
     fs.copyFileSync(src, dest);
 
-    const project = config.modResults;
-    const groupName = projectName;
-
-    // Avoid adding the file twice on repeated prebuild runs
-    const alreadyAdded = project
-      .pbxFileReferenceSection()
-      && Object.values(project.pbxFileReferenceSection()).some(
-        (ref) => ref && ref.path === '"PrivacyInfo.xcprivacy"'
-      );
-
-    if (!alreadyAdded) {
-      project.addResourceFile(
-        `${projectName}/PrivacyInfo.xcprivacy`,
-        { target: project.getFirstTarget().uuid },
-        groupName
-      );
-    }
-
     return config;
-  });
+  }]);
 };
 
 module.exports = withPrivacyManifest;
