@@ -117,16 +117,21 @@ export default function SettingsScreen() {
           text: t('settings.delete'),
           style: 'destructive',
           onPress: async () => {
-            try {
-              if (isSupabaseConfigured && supabase) {
+            // Server-side deletion: best-effort, never blocks local cleanup
+            if (isSupabaseConfigured && supabase) {
+              try {
+                // refreshSession() forces the auth server to issue a fresh token,
+                // avoiding stale-token 401s from the edge function gateway
+                await supabase.auth.refreshSession();
                 const { error } = await supabase.functions.invoke('delete-account');
-                if (error) throw error;
-                await supabase.auth.signOut();
+                if (error) console.error('[deleteAccount] edge function error:', error);
+              } catch (e) {
+                console.error('[deleteAccount] unexpected error:', e);
               }
-              deleteAccount();
-            } catch {
-              Alert.alert(t('settings.error'), t('settings.deleteAccountFailed'));
+              await supabase.auth.signOut({ scope: 'local' }).catch(console.error);
             }
+            // Local cleanup always runs
+            deleteAccount();
           },
         },
       ]
@@ -250,6 +255,25 @@ export default function SettingsScreen() {
               color={theme.textOnSecondary}
             />
           </Pressable>
+        )}
+
+        {!isPremium && (
+          <View style={styles.subscriptionLinks}>
+            <Text style={[styles.subscriptionLinksText, { color: theme.textSecondary }]}>
+              {t('settings.subscriptionTermsPrefix')}{' '}
+            </Text>
+            <Pressable onPress={() => Linking.openURL('https://ferfrizzo.github.io/footballSudoku/terms-of-service.html')}>
+              <Text style={[styles.subscriptionLinkBtn, { color: theme.textSecondary }]}>
+                {t('settings.termsOfService')}
+              </Text>
+            </Pressable>
+            <Text style={[styles.subscriptionLinksText, { color: theme.textSecondary }]}>{' '}{t('settings.and')}{' '}</Text>
+            <Pressable onPress={() => Linking.openURL('https://ferfrizzo.github.io/footballSudoku/privacy-policy.html')}>
+              <Text style={[styles.subscriptionLinkBtn, { color: theme.textSecondary }]}>
+                {t('settings.privacyPolicy')}
+              </Text>
+            </Pressable>
+          </View>
         )}
 
         {isPremium && (
@@ -686,5 +710,22 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
     marginTop: 2,
+  },
+  subscriptionLinks: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: -4,
+    paddingHorizontal: 8,
+  },
+  subscriptionLinksText: {
+    fontSize: 11,
+    fontFamily: 'Inter_400Regular',
+  },
+  subscriptionLinkBtn: {
+    fontSize: 11,
+    fontFamily: 'Inter_500Medium',
+    textDecorationLine: 'underline',
   },
 });

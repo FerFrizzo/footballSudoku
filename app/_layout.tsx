@@ -36,6 +36,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const segments = useSegments();
   const isAuthenticated = useGameStore((s) => s.isAuthenticated);
   const hasClub = useGameStore((s) => !!s.club);
+  const hasSeenOnboarding = useGameStore((s) => s.hasSeenOnboarding);
   const hasHydrated = useGameStore((s) => s._hasHydrated);
 
   useEffect(() => {
@@ -53,14 +54,18 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     const inAuthGroup = segments[0] === '(auth)';
     const inSetupGroup = segments[0] === '(setup)';
 
+    const inOnboarding = segments[0] === '(setup)' && segments[1] === 'onboarding';
+
     if (!isAuthenticated && !inAuthGroup) {
       router.replace('/(auth)/login');
     } else if (isAuthenticated && !hasClub && !inSetupGroup) {
       router.replace('/(setup)/club');
-    } else if (isAuthenticated && hasClub && (inAuthGroup || inSetupGroup)) {
+    } else if (isAuthenticated && hasClub && !hasSeenOnboarding && !inOnboarding) {
+      router.replace('/(setup)/onboarding');
+    } else if (isAuthenticated && hasClub && hasSeenOnboarding && (inAuthGroup || inSetupGroup)) {
       router.replace('/(tabs)');
     }
-  }, [isAuthenticated, hasClub, hasHydrated, segments]);
+  }, [isAuthenticated, hasClub, hasSeenOnboarding, hasHydrated, segments]);
 
   if (!hasHydrated) {
     return (

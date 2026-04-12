@@ -29,8 +29,10 @@ interface GameState {
   gamesCompletedSinceLastAd: number;
   freeHintsUsed: Record<string, boolean>;
   language: string;
+  hasSeenOnboarding: boolean;
   _hasHydrated: boolean;
 
+  markOnboardingSeen: () => void;
   setAuthenticated: (v: boolean, userId?: string | null) => void;
   setClub: (club: ClubProfile) => void;
   setLanguage: (code: string) => void;
@@ -80,7 +82,10 @@ export const useGameStore = create<GameState>()(
       gamesCompletedSinceLastAd: 0,
       freeHintsUsed: {},
       language: 'en',
+      hasSeenOnboarding: false,
       _hasHydrated: false,
+
+      markOnboardingSeen: () => set({ hasSeenOnboarding: true }),
 
       setAuthenticated: (v, userId) =>
         set({ isAuthenticated: v, supabaseUserId: userId || null }),

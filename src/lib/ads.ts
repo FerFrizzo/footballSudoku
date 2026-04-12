@@ -1,36 +1,40 @@
 import { Platform } from 'react-native';
-import {
-  InterstitialAd,
-  AdEventType,
-  TestIds,
-  mobileAds,
-} from 'react-native-google-mobile-ads';
+import Constants from 'expo-constants';
 
 import { useGameStore } from '../state/gameStore';
 import { trackEvent } from '../services/analytics';
 
+// react-native-google-mobile-ads requires native code unavailable in Expo Go.
+const isExpoGo = Constants.executionEnvironment === 'storeClient';
+
 // ---------------------------------------------------------------------------
 // Ad unit IDs
-// Replace EXPO_PUBLIC_ADMOB_IOS_AD_UNIT_ID and EXPO_PUBLIC_ADMOB_ANDROID_AD_UNIT_ID
-// in your .env file with the interstitial ad unit IDs from your AdMob dashboard.
-// Also replace the app-level IDs in app.json (androidAppId / iosAppId) before
-// submitting to the stores.
 // ---------------------------------------------------------------------------
-const AD_UNIT_ID = Platform.select({
-  ios: __DEV__
-    ? TestIds.INTERSTITIAL
-    : (process.env.EXPO_PUBLIC_ADMOB_IOS_AD_UNIT_ID ?? ''),
-  android: __DEV__
-    ? TestIds.INTERSTITIAL
-    : (process.env.EXPO_PUBLIC_ADMOB_ANDROID_AD_UNIT_ID ?? ''),
-}) ?? TestIds.INTERSTITIAL;
+function getAdUnitId(): string {
+  if (isExpoGo) return '';
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { TestIds } = require('react-native-google-mobile-ads');
+  return (
+    Platform.select({
+      ios: __DEV__
+        ? TestIds.INTERSTITIAL
+        : (process.env.EXPO_PUBLIC_ADMOB_IOS_AD_UNIT_ID ?? ''),
+      android: __DEV__
+        ? TestIds.INTERSTITIAL
+        : (process.env.EXPO_PUBLIC_ADMOB_ANDROID_AD_UNIT_ID ?? ''),
+    }) ?? TestIds.INTERSTITIAL
+  );
+}
 
-let interstitial: InterstitialAd = InterstitialAd.createForAdRequest(AD_UNIT_ID);
+let interstitial: any = null;
 let adLoaded = false;
 
 function loadAd() {
+  if (isExpoGo) return;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { InterstitialAd, AdEventType } = require('react-native-google-mobile-ads');
   adLoaded = false;
-  interstitial = InterstitialAd.createForAdRequest(AD_UNIT_ID);
+  interstitial = InterstitialAd.createForAdRequest(getAdUnitId());
 
   const unsubLoaded = interstitial.addAdEventListener(AdEventType.LOADED, () => {
     adLoaded = true;
@@ -46,7 +50,10 @@ function loadAd() {
 }
 
 export async function initializeAds(): Promise<void> {
+  if (isExpoGo) return;
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { mobileAds } = require('react-native-google-mobile-ads');
     await mobileAds().initialize();
     loadAd();
   } catch (e) {
@@ -66,10 +73,13 @@ export function showInterstitialIfDue(
   return new Promise((resolve) => {
     const shouldShow = useGameStore.getState().incrementGamesCompleted();
 
-    if (!shouldShow || !adLoaded) {
+    if (isExpoGo || !shouldShow || !adLoaded) {
       resolve();
       return;
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { AdEventType } = require('react-native-google-mobile-ads');
 
     const unsubClose = interstitial.addAdEventListener(AdEventType.CLOSED, () => {
       unsubClose();

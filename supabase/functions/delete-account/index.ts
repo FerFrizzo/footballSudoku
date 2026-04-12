@@ -14,7 +14,6 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    // Use the user's JWT to identify who is making the request
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -23,11 +22,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Verify the user's token and get their ID
-    const userClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: { user }, error: userError } = await userClient.auth.getUser();
+    // Validate the JWT and resolve the user via the admin client (no ANON_KEY needed)
+    const token = authHeader.replace("Bearer ", "");
+    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+    const { data: { user }, error: userError } = await adminClient.auth.getUser(token);
     if (userError || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -36,7 +34,6 @@ Deno.serve(async (req) => {
     }
 
     // Delete the user with the service role key (bypasses RLS)
-    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
     const { error: deleteError } = await adminClient.auth.admin.deleteUser(user.id);
     if (deleteError) {
       return new Response(JSON.stringify({ error: deleteError.message }), {

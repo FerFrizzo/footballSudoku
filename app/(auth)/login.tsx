@@ -10,6 +10,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
+import * as Crypto from 'expo-crypto';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,6 +33,7 @@ export default function LoginScreen() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const setAuthenticated = useGameStore((s) => s.setAuthenticated);
   const deviceId = useGameStore((s) => s.deviceId);
@@ -124,16 +126,24 @@ export default function LoginScreen() {
     setLoading(true);
 
     try {
+      const rawNonce = Crypto.randomUUID();
+      const hashedNonce = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        rawNonce
+      );
+
       const credential = await AppleAuthentication.signInAsync({
         requestedScopes: [
           AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
           AppleAuthentication.AppleAuthenticationScope.EMAIL,
         ],
+        nonce: hashedNonce,
       });
 
       const { data, error: signInError } = await supabase.auth.signInWithIdToken({
         provider: 'apple',
         token: credential.identityToken!,
+        nonce: rawNonce,
       });
       if (signInError) throw signInError;
       if (data.user) {
@@ -270,8 +280,19 @@ export default function LoginScreen() {
               placeholderTextColor="#9E9E9E"
               value={password}
               onChangeText={setPassword}
-              secureTextEntry
+              secureTextEntry={!showPassword}
             />
+            <Pressable
+              onPress={() => setShowPassword((v) => !v)}
+              hitSlop={8}
+              style={{ paddingLeft: 8 }}
+            >
+              <Ionicons
+                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                size={20}
+                color="#9E9E9E"
+              />
+            </Pressable>
           </View>
 
           {!!error && <Text style={styles.error}>{error}</Text>}

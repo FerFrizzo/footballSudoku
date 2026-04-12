@@ -117,6 +117,8 @@ export default {
     manageSubscription: 'Gerir subscrição',
     analyticsTracking: 'Análises',
     analyticsTrackingHint: 'Ajude a melhorar o jogo partilhando dados de utilização anónimos',
+    subscriptionTermsPrefix: 'Ao subscrever, aceita os nossos',
+    and: 'e',
   },
   about: {
     title: 'Sobre',
@@ -140,6 +142,17 @@ export default {
   tabs: {
     season: 'Temporada',
     settings: 'Definições',
+  },
+  onboarding: {
+    slide1Title: 'Your Club, Your Story',
+    slide1Body: 'You manage a club rising through a 10-tier football pyramid. Win matches by solving sudoku puzzles.',
+    slide2Title: 'How Matches Work',
+    slide2Body: 'Each puzzle is a matchday. 0 mistakes = 3 stars = a win. Finish top 3 to earn promotion.',
+    slide3Title: 'Earn & Spend Gems',
+    slide3Body: 'Earn gems for every match you play. Spend them on hints when you get stuck.',
+    skip: 'Skip',
+    next: 'Next',
+    letsGo: "Let's Go!",
   },
   languages: {
     en: 'English',

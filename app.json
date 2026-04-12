@@ -2,7 +2,7 @@
   "expo": {
     "name": "Football Sudoku",
     "slug": "footballsudoku",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "footballsudoku",
@@ -10,6 +10,8 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": false,
+      "usesAppleSignIn": true,
+      "buildNumber": "4",
       "bundleIdentifier": "com.footballsudoku.app",
       "infoPlist": {
         "NSUserTrackingUsageDescription": "We use your advertising identifier to show you relevant ads and measure ad performance. You can change this at any time in your device settings.",

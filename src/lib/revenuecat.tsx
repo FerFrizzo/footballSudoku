@@ -28,19 +28,15 @@ function getRevenueCatApiKey(): string | null {
     return REVENUECAT_TEST_API_KEY ?? null;
   }
 
-  if (!REVENUECAT_TEST_API_KEY || !REVENUECAT_IOS_API_KEY || !REVENUECAT_ANDROID_API_KEY) {
-    return null;
-  }
-
   if (Platform.OS === 'ios') {
-    return REVENUECAT_IOS_API_KEY;
+    return REVENUECAT_IOS_API_KEY ?? null;
   }
 
   if (Platform.OS === 'android') {
-    return REVENUECAT_ANDROID_API_KEY;
+    return REVENUECAT_ANDROID_API_KEY ?? null;
   }
 
-  return REVENUECAT_TEST_API_KEY;
+  return REVENUECAT_TEST_API_KEY ?? null;
 }
 
 export function initializeRevenueCat() {
