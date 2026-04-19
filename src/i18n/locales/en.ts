@@ -50,6 +50,19 @@ export default {
     promotionTop3: 'Promotion (Top 3)',
     dropZoneBottom3: 'Drop Zone (Bottom 3)',
     team: 'Team',
+    difficulty: {
+      '1': 'Expert',
+      '2': 'Very Hard',
+      '3': 'Hard',
+      '4': 'Challenging',
+      '5': 'Intermediate+',
+      '6': 'Intermediate',
+      '7': 'Moderate',
+      '8': 'Easy+',
+      '9': 'Easy',
+      '10': 'Beginner',
+      standard: 'Standard',
+    },
   },
   game: {
     preparingPuzzle: 'Preparing puzzle...',
@@ -132,6 +145,12 @@ export default {
     game2: 'Earn 3 stars to win, 2 for a draw, and 1 for a loss. Finish in the top 3 of your league table to earn promotion to the next division.',
     regionsTitle: 'Fictional Regions',
     regions1: 'The game world spans five fictional regions: Northern Coast, Midlands Plains, Southern Vale, Eastern Ridge, and Western Harbors. All locations are entirely made up.',
+    appName: 'Football Sudoku',
+  },
+  notFound: {
+    title: 'Oops!',
+    message: "This screen doesn't exist.",
+    goHome: 'Go to home screen!',
   },
   dialogue: {
     theBoard: 'The Board',

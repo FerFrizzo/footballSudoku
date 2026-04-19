@@ -60,7 +60,7 @@ export default function AboutScreen() {
             <Ionicons name="football" size={40} color={theme.primary} />
           </View>
           <Text style={[styles.appName, { color: theme.text }]}>
-            Story Mode Sudoku
+            {t('about.appName')}
           </Text>
           <Text style={[styles.version, { color: theme.textSecondary }]}>
             {t('about.version')}

@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/src/theme/ThemeProvider';
 import { useGameStore } from '@/src/state/gameStore';
-import { DIVISIONS, DIVISION_DIFFICULTY_LABELS } from '@/src/types';
+import { DIVISIONS } from '@/src/types';
 import { trackEvent } from '@/src/services/analytics';
 
 function formatTime(seconds: number | null): string {
@@ -67,7 +67,7 @@ export default function DivisionScreen() {
 
   const matchdays = Array.from({ length: division.levelCount }, (_, i) => i);
   const leagueTable = divisionId ? getLeagueTable(divisionId) : [];
-  const difficultyLabel = DIVISION_DIFFICULTY_LABELS[division.id] || 'Standard';
+  const difficultyLabel = t(`division.difficulty.${division.id}`, { defaultValue: t('division.difficulty.standard') });
 
   function handleMatchdayPress(matchdayIndex: number) {
     if (!divisionId) return;

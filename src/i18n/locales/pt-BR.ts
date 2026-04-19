@@ -50,6 +50,19 @@ export default {
     promotionTop3: 'Promoção (Top 3)',
     dropZoneBottom3: 'Zona de Rebaixamento (Bottom 3)',
     team: 'Time',
+    difficulty: {
+      '1': 'Especialista',
+      '2': 'Muito Difícil',
+      '3': 'Difícil',
+      '4': 'Desafiador',
+      '5': 'Intermediário+',
+      '6': 'Intermediário',
+      '7': 'Moderado',
+      '8': 'Fácil+',
+      '9': 'Fácil',
+      '10': 'Iniciante',
+      standard: 'Padrão',
+    },
   },
   game: {
     preparingPuzzle: 'Preparando o puzzle...',
@@ -132,6 +145,12 @@ export default {
     game2: 'Ganhe 3 estrelas para vencer, 2 para empate e 1 para derrota. Termine no top 3 da sua tabela para ser promovido.',
     regionsTitle: 'Regiões Fictícias',
     regions1: 'O mundo do jogo abrange cinco regiões fictícias: Costa Norte, Planícies do Midlands, Vale do Sul, Crista Oriental e Portos Ocidentais. Todos os locais são fictícios.',
+    appName: 'Football Sudoku',
+  },
+  notFound: {
+    title: 'Opa!',
+    message: 'Esta tela não existe.',
+    goHome: 'Ir para a tela inicial',
   },
   dialogue: {
     theBoard: 'A Diretoria',

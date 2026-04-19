@@ -3,6 +3,7 @@ export interface ClubProfile {
   badgeUri: string | null;
   primaryColor: string;
   secondaryColor: string;
+  badgeTemplateId: string | null;
 }
 
 export interface MatchdayProgress {

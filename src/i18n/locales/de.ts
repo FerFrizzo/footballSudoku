@@ -50,6 +50,19 @@ export default {
     promotionTop3: 'Aufstieg (Top 3)',
     dropZoneBottom3: 'Abstiegszone (Bottom 3)',
     team: 'Verein',
+    difficulty: {
+      '1': 'Experte',
+      '2': 'Sehr Schwer',
+      '3': 'Schwer',
+      '4': 'Fordernd',
+      '5': 'Fortgeschritten+',
+      '6': 'Fortgeschritten',
+      '7': 'Mittel',
+      '8': 'Leicht+',
+      '9': 'Leicht',
+      '10': 'Anfänger',
+      standard: 'Standard',
+    },
   },
   game: {
     preparingPuzzle: 'Puzzle wird vorbereitet...',
@@ -132,6 +145,12 @@ export default {
     game2: 'Verdiene 3 Sterne für einen Sieg, 2 für ein Unentschieden und 1 für eine Niederlage. Beende die Saison in den Top 3, um aufzusteigen.',
     regionsTitle: 'Fiktive Regionen',
     regions1: 'Die Spielwelt umfasst fünf fiktive Regionen: Nordküste, Midlands-Ebenen, Südtal, Ostkamm und Westhäfen. Alle Orte sind erfunden.',
+    appName: 'Football Sudoku',
+  },
+  notFound: {
+    title: 'Hoppla!',
+    message: 'Diese Seite existiert nicht.',
+    goHome: 'Zur Startseite',
   },
   dialogue: {
     theBoard: 'Der Vorstand',

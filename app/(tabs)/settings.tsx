@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/src/theme/ThemeProvider';
 import { useGameStore } from '@/src/state/gameStore';
 import { useSubscription } from '@/src/lib/revenuecat';
+import ClubBadgeTemplate from '@/src/components/ClubBadgeTemplate';
 import { supabase, isSupabaseConfigured } from '@/src/services/supabase';
 import { SUPPORTED_LANGUAGES } from '@/src/i18n';
 
@@ -167,6 +168,13 @@ export default function SettingsScreen() {
               <Image
                 source={{ uri: club.badgeUri }}
                 style={styles.clubBadge}
+              />
+            ) : club?.badgeTemplateId ? (
+              <ClubBadgeTemplate
+                templateId={club.badgeTemplateId}
+                primaryColor={club.primaryColor}
+                secondaryColor={club.secondaryColor}
+                size={44}
               />
             ) : (
               <View

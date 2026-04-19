@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/src/theme/ThemeProvider';
 import { useGameStore } from '@/src/state/gameStore';
 import { DIVISIONS } from '@/src/types';
+import ClubBadgeTemplate from '@/src/components/ClubBadgeTemplate';
 
 export default function PyramidMapScreen() {
   const insets = useSafeAreaInsets();
@@ -53,6 +54,13 @@ export default function PyramidMapScreen() {
               <Image
                 source={{ uri: club.badgeUri }}
                 style={styles.clubBadge}
+              />
+            ) : club?.badgeTemplateId ? (
+              <ClubBadgeTemplate
+                templateId={club.badgeTemplateId}
+                primaryColor={club.primaryColor}
+                secondaryColor={club.secondaryColor}
+                size={44}
               />
             ) : (
               <View

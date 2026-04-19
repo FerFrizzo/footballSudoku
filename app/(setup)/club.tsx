@@ -6,13 +6,11 @@ import {
   Pressable,
   StyleSheet,
   ScrollView,
-  Image,
   Alert,
   Platform,
   KeyboardAvoidingView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -20,36 +18,20 @@ import { useTranslation } from 'react-i18next';
 import { useGameStore } from '@/src/state/gameStore';
 import { trackEvent } from '@/src/services/analytics';
 import ColorPicker from '@/src/components/ColorPicker';
+import ClubBadgeTemplate from '@/src/components/ClubBadgeTemplate';
 
 export default function ClubSetupScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const [name, setName] = useState('');
-  const [badgeUri, setBadgeUri] = useState<string | null>(null);
   const [primaryColor, setPrimaryColor] = useState('#1B5E20');
   const [secondaryColor, setSecondaryColor] = useState('#FFD600');
   const [step, setStep] = useState(0);
+  const [selectedBadgeId, setSelectedBadgeId] = useState<string>('shield_split');
 
   const setClub = useGameStore((s) => s.setClub);
   const deviceId = useGameStore((s) => s.deviceId);
   const userId = useGameStore((s) => s.supabaseUserId);
-
-  async function pickImage() {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert(t('club.permissionNeeded'), t('club.photoPermission'));
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
-    if (!result.canceled && result.assets[0]) {
-      setBadgeUri(result.assets[0].uri);
-    }
-  }
 
   function handleCreate() {
     if (!name.trim()) {
@@ -58,9 +40,10 @@ export default function ClubSetupScreen() {
     }
     setClub({
       name: name.trim(),
-      badgeUri,
+      badgeUri: null,
       primaryColor,
       secondaryColor,
+      badgeTemplateId: selectedBadgeId,
     });
     trackEvent('club_created', { clubName: name.trim() }, userId, deviceId);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -103,26 +86,6 @@ export default function ClubSetupScreen() {
                 maxLength={30}
               />
             </View>
-
-            <Text style={[styles.sectionTitle, { marginTop: 24 }]}>
-              {t('club.badgeLabel')}
-            </Text>
-            <Pressable
-              onPress={pickImage}
-              style={({ pressed }) => [
-                styles.badgePicker,
-                { opacity: pressed ? 0.8 : 1 },
-              ]}
-            >
-              {badgeUri ? (
-                <Image source={{ uri: badgeUri }} style={styles.badgeImage} />
-              ) : (
-                <View style={styles.badgePlaceholder}>
-                  <Ionicons name="camera-outline" size={32} color="#9E9E9E" />
-                  <Text style={styles.badgeText}>{t('club.tapToSelect')}</Text>
-                </View>
-              )}
-            </Pressable>
 
             <Pressable
               onPress={() => {
@@ -172,6 +135,29 @@ export default function ClubSetupScreen() {
                 Haptics.selectionAsync();
               }}
             />
+
+            <View style={styles.badgeSection}>
+              <Text style={styles.sectionTitle}>{t('club.badgeLabel')}</Text>
+              <View style={styles.badgeGrid}>
+                {['shield_split', 'shield_stripe', 'circle_badge', 'diamond', 'pennant_stripe', 'chevron'].map((id) => (
+                  <Pressable
+                    key={id}
+                    onPress={() => {
+                      setSelectedBadgeId(id);
+                      Haptics.selectionAsync();
+                    }}
+                  >
+                    <ClubBadgeTemplate
+                      templateId={id}
+                      primaryColor={primaryColor}
+                      secondaryColor={secondaryColor}
+                      size={80}
+                      selected={selectedBadgeId === id}
+                    />
+                  </Pressable>
+                ))}
+              </View>
+            </View>
 
             <View style={styles.previewRow}>
               <View
@@ -322,31 +308,15 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
     color: '#1A1A1A',
   },
-  badgePicker: {
-    alignSelf: 'center',
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: '#E0E0E0',
-    borderStyle: 'dashed',
+  badgeSection: {
+    marginTop: 20,
+    gap: 12,
   },
-  badgeImage: {
-    width: '100%',
-    height: '100%',
-  },
-  badgePlaceholder: {
-    flex: 1,
-    alignItems: 'center',
+  badgeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
     justifyContent: 'center',
-    backgroundColor: '#FAFAFA',
-    gap: 4,
-  },
-  badgeText: {
-    fontSize: 11,
-    fontFamily: 'Inter_400Regular',
-    color: '#9E9E9E',
   },
   nextBtn: {
     backgroundColor: '#1B5E20',
