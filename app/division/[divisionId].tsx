@@ -285,7 +285,6 @@ export default function DivisionScreen() {
             <Text style={[styles.thStat, { color: theme.textSecondary }]}>W</Text>
             <Text style={[styles.thStat, { color: theme.textSecondary }]}>D</Text>
             <Text style={[styles.thStat, { color: theme.textSecondary }]}>L</Text>
-            <Text style={[styles.thStat, { color: theme.textSecondary }]}>GD</Text>
             <Text style={[styles.thPts, { color: theme.textSecondary }]}>Pts</Text>
           </View>
 
@@ -294,7 +293,6 @@ export default function DivisionScreen() {
             const isPromoZone = pos <= 3;
             const isDropZone = pos >= 18;
             const isUserTeam = team.isUser;
-            const gd = team.gf - team.ga;
 
             let rowBg = theme.surface;
             if (isUserTeam) rowBg = theme.cellHighlight;
@@ -335,9 +333,6 @@ export default function DivisionScreen() {
                 <Text style={[styles.tdStat, { color: theme.textSecondary }]}>{team.wins}</Text>
                 <Text style={[styles.tdStat, { color: theme.textSecondary }]}>{team.draws}</Text>
                 <Text style={[styles.tdStat, { color: theme.textSecondary }]}>{team.losses}</Text>
-                <Text style={[styles.tdStat, { color: gd > 0 ? '#388E3C' : gd < 0 ? '#D32F2F' : theme.textSecondary }]}>
-                  {gd > 0 ? `+${gd}` : gd}
-                </Text>
                 <Text style={[styles.tdPts, { color: theme.text }]}>{team.points}</Text>
               </View>
             );
