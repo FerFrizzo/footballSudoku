@@ -7,11 +7,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
 
-const screenWidth = Dimensions.get('window').width;
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const GRID_PADDING = 4;
 const GRID_SIZE = screenWidth - GRID_PADDING * 2;
 const CELL_SIZE = Math.floor(GRID_SIZE / 9);
 const ACTUAL_GRID = CELL_SIZE * 9;
+// Fill available screen height: subtract ~350pt for header + controls + safe areas
+const CELL_HEIGHT = Math.max(CELL_SIZE, Math.floor((screenHeight - 350) / 9));
 
 interface CellProps {
   row: number;
@@ -84,7 +86,7 @@ const Cell = memo(function Cell({
         styles.cell,
         {
           width: CELL_SIZE,
-          height: CELL_SIZE,
+          height: CELL_HEIGHT,
           backgroundColor: bgColor,
           borderRightWidth: borderRight,
           borderBottomWidth: borderBottom,
