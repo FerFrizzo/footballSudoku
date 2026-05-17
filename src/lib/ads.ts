@@ -28,6 +28,7 @@ function getAdUnitId(): string {
 
 let interstitial: any = null;
 let adLoaded = false;
+let initialized = false;
 
 function loadAd() {
   if (isExpoGo) return;
@@ -50,7 +51,8 @@ function loadAd() {
 }
 
 export async function initializeAds(): Promise<void> {
-  if (isExpoGo) return;
+  if (isExpoGo || initialized) return;
+  initialized = true;
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { mobileAds } = require('react-native-google-mobile-ads');

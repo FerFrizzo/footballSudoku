@@ -27,7 +27,6 @@ import '@/src/i18n';
 
 SplashScreen.preventAutoHideAsync();
 initializeRevenueCat();
-initializeAds();
 
 const HYDRATION_TIMEOUT_MS = 5000;
 
@@ -150,7 +149,11 @@ export default function RootLayout() {
     if ((fontsLoaded || fontError) && sessionChecked) {
       SplashScreen.hideAsync();
       if (Platform.OS === 'ios') {
-        requestTrackingPermissionsAsync();
+        requestTrackingPermissionsAsync().finally(() => {
+          initializeAds();
+        });
+      } else {
+        initializeAds();
       }
       const deviceId = useGameStore.getState().deviceId;
       trackEvent('app_open', {}, useGameStore.getState().supabaseUserId, deviceId);
