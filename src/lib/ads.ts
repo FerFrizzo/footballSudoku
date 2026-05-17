@@ -36,12 +36,14 @@ function loadAd() {
   adLoaded = false;
   interstitial = InterstitialAd.createForAdRequest(getAdUnitId());
 
-  interstitial.addAdEventListener(AdEventType.LOADED, () => {
+  const unsubLoaded = interstitial.addAdEventListener(AdEventType.LOADED, () => {
     adLoaded = true;
+    unsubLoaded();
   });
 
-  interstitial.addAdEventListener(AdEventType.ERROR, () => {
+  const unsubError = interstitial.addAdEventListener(AdEventType.ERROR, () => {
     adLoaded = false;
+    unsubError();
   });
 
   interstitial.load();

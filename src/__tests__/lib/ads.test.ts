@@ -52,7 +52,11 @@ beforeEach(() => {
 describe('showInterstitialIfDue — listener cleanup', () => {
   async function setup() {
     await initializeAds();
-    fireEvent('loaded');
+    fireEvent('loaded'); // marks adLoaded=true, also calls unsubLoaded() once
+    // Clear out any remaining loadAd() listeners so they don't interfere with
+    // the showInterstitialIfDue tests below.
+    Object.keys(listeners).forEach((k) => delete listeners[k]);
+    mockUnsub.mockClear(); // reset count — we only want to count cleanup() calls below
   }
 
   it('unsubscribes BOTH listeners when CLOSED fires', async () => {
