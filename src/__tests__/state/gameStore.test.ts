@@ -548,6 +548,37 @@ describe('resetProgress', () => {
   });
 });
 
+// ─── incrementGamesCompleted / resetAdCounter ─────────────────────────────────
+
+describe('incrementGamesCompleted / resetAdCounter', () => {
+  beforeEach(() => {
+    useGameStore.setState({ gamesCompletedSinceLastAd: 0 });
+  });
+
+  it('returns false on first game, true on second without resetting counter', () => {
+    const store = useGameStore.getState();
+    expect(store.incrementGamesCompleted()).toBe(false); // game 1: counter → 1
+    expect(store.incrementGamesCompleted()).toBe(true);  // game 2: counter → 2, ready
+    // Counter must NOT have reset — still 2
+    expect(useGameStore.getState().gamesCompletedSinceLastAd).toBe(2);
+  });
+
+  it('resetAdCounter sets gamesCompletedSinceLastAd to 0', () => {
+    useGameStore.setState({ gamesCompletedSinceLastAd: 2 });
+    useGameStore.getState().resetAdCounter();
+    expect(useGameStore.getState().gamesCompletedSinceLastAd).toBe(0);
+  });
+
+  it('triggers again after 2 more games once reset', () => {
+    const store = useGameStore.getState();
+    store.incrementGamesCompleted(); // 1
+    store.incrementGamesCompleted(); // 2 → true
+    store.resetAdCounter();           // reset
+    expect(store.incrementGamesCompleted()).toBe(false); // 1 again
+    expect(store.incrementGamesCompleted()).toBe(true);  // 2 again → true
+  });
+});
+
 // ─── settings ────────────────────────────────────────────────────────────────
 
 describe('settings', () => {

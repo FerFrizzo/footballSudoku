@@ -53,6 +53,7 @@ interface GameState {
   setPremium: (v: boolean) => void;
   setAnalyticsEnabled: (v: boolean) => void;
   incrementGamesCompleted: () => boolean;
+  resetAdCounter: () => void;
   resetProgress: () => void;
   getTotalStars: () => number;
   getDivisionStars: (divisionId: string) => number;
@@ -263,13 +264,11 @@ export const useGameStore = create<GameState>()(
 
       incrementGamesCompleted: () => {
         const next = get().gamesCompletedSinceLastAd + 1;
-        if (next >= 2) {
-          set({ gamesCompletedSinceLastAd: 0 });
-          return true;
-        }
         set({ gamesCompletedSinceLastAd: next });
-        return false;
+        return next >= 2;
       },
+
+      resetAdCounter: () => set({ gamesCompletedSinceLastAd: 0 }),
 
       resetProgress: () =>
         set({

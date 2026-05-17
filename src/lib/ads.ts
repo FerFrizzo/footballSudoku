@@ -28,6 +28,7 @@ function getAdUnitId(): string {
 
 let interstitial: any = null;
 let adLoaded = false;
+let initialized = false;
 
 function loadAd() {
   if (isExpoGo) return;
@@ -50,7 +51,8 @@ function loadAd() {
 }
 
 export async function initializeAds(): Promise<void> {
-  if (isExpoGo) return;
+  if (isExpoGo || initialized) return;
+  initialized = true;
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { mobileAds } = require('react-native-google-mobile-ads');
@@ -81,18 +83,43 @@ export function showInterstitialIfDue(
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { AdEventType } = require('react-native-google-mobile-ads');
 
-    const unsubClose = interstitial.addAdEventListener(AdEventType.CLOSED, () => {
-      unsubClose();
+    let unsubClose: () => void;
+    let unsubError: () => void;
+
+    function cleanup() {
+      unsubClose?.();
+      unsubError?.();
+    }
+
+    // cleanup() is idempotent: unsub functions from react-native-google-mobile-ads are safe to call multiple times
+    unsubClose = interstitial.addAdEventListener(AdEventType.CLOSED, () => {
+      cleanup();
+      useGameStore.getState().resetAdCounter();
       loadAd();
       resolve();
     });
 
-    const unsubError = interstitial.addAdEventListener(AdEventType.ERROR, () => {
-      unsubError();
+    unsubError = interstitial.addAdEventListener(AdEventType.ERROR, () => {
+      cleanup();
+      useGameStore.getState().resetAdCounter();
       resolve();
     });
 
     trackEvent('ad_interstitial_shown', {}, userId, deviceId);
-    interstitial.show().catch(() => resolve());
+    interstitial.show().catch(() => {
+      cleanup();
+      useGameStore.getState().resetAdCounter();
+      loadAd();
+      resolve();
+    });
   });
+}
+
+/**
+ * For testing only — resets module-level state between tests
+ */
+export function __resetForTesting() {
+  initialized = false;
+  adLoaded = false;
+  interstitial = null;
 }
