@@ -46,6 +46,9 @@ google-play-service-account.json
 
 .env
 
+# Git worktrees
+.worktrees/
+
 # Tool/editor artifacts
 .cache/
 .claude/
