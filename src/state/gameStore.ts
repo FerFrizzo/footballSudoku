@@ -363,6 +363,7 @@ export const useGameStore = create<GameState>()(
         gamesCompletedSinceLastAd: state.gamesCompletedSinceLastAd,
         freeHintsUsed: state.freeHintsUsed,
         language: state.language,
+        hasSeenOnboarding: state.hasSeenOnboarding,
       }),
       onRehydrateStorage: () => {
         return (state) => {
