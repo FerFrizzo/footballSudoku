@@ -56,7 +56,7 @@ export default function NumberPad({
           ]}
           disabled={!canUndo}
         >
-          <Ionicons name="arrow-undo" size={20} color={theme.text} />
+          <Ionicons name="arrow-undo" size={24} color={theme.text} />
           <Text style={[styles.actionLabel, { color: theme.textSecondary }]}>
             Undo
           </Text>
@@ -72,7 +72,7 @@ export default function NumberPad({
             },
           ]}
         >
-          <Ionicons name="backspace-outline" size={20} color={theme.text} />
+          <Ionicons name="backspace-outline" size={24} color={theme.text} />
           <Text style={[styles.actionLabel, { color: theme.textSecondary }]}>
             Erase
           </Text>
@@ -90,7 +90,7 @@ export default function NumberPad({
         >
           <Ionicons
             name="pencil"
-            size={20}
+            size={24}
             color={isNotesMode ? theme.textOnPrimary : theme.text}
           />
           <Text
@@ -116,7 +116,7 @@ export default function NumberPad({
           ]}
           disabled={hintsAvailable <= 0}
         >
-          <Ionicons name="bulb-outline" size={20} color={theme.secondary} />
+          <Ionicons name="bulb-outline" size={24} color={theme.secondary} />
           <Text style={[styles.actionLabel, { color: theme.textSecondary }]}>
             {hintsAvailable}
           </Text>
@@ -188,7 +188,7 @@ export default function NumberPad({
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 8,
     gap: 12,
   },
   actions: {
@@ -199,11 +199,11 @@ const styles = StyleSheet.create({
   actionBtn: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 12,
-    minWidth: 60,
-    gap: 2,
+    minWidth: 64,
+    gap: 4,
   },
   actionLabel: {
     fontSize: 11,
@@ -215,26 +215,26 @@ const styles = StyleSheet.create({
   },
   numBtn: {
     flex: 1,
-    height: 52,
+    height: 80,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    marginHorizontal: 3,
+    marginHorizontal: 2,
   },
   numBtnInner: {
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 0,
+    gap: 2,
   },
   remainingText: {
-    fontSize: 10,
+    fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
-    lineHeight: 12,
+    lineHeight: 13,
   },
   numText: {
-    fontSize: 20,
+    fontSize: 34,
     fontFamily: 'Inter_700Bold',
-    lineHeight: 24,
+    lineHeight: 40,
   },
 });
