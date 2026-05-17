@@ -12,8 +12,8 @@ const GRID_PADDING = 4;
 const GRID_SIZE = screenWidth - GRID_PADDING * 2;
 const CELL_SIZE = Math.floor(GRID_SIZE / 9);
 const ACTUAL_GRID = CELL_SIZE * 9;
-// Fill available screen height: subtract ~350pt for header + controls + safe areas
-const CELL_HEIGHT = Math.max(CELL_SIZE, Math.floor((screenHeight - 350) / 9));
+// Fill available screen height: subtract ~410pt for header + controls + safe areas
+const CELL_HEIGHT = Math.max(CELL_SIZE, Math.floor((screenHeight - 410) / 9));
 
 interface CellProps {
   row: number;
