@@ -23,6 +23,19 @@ jest.mock('../../theme/ThemeProvider', () => ({
 }));
 
 describe('SudokuGrid sizing', () => {
+  beforeEach(() => {
+    jest.spyOn(Dimensions, 'get').mockReturnValue({
+      width: 375,
+      height: 812,
+      scale: 2,
+      fontScale: 1,
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('grid uses at least 96% of screen width', () => {
     const { getByTestId } = render(
       <SudokuGrid
@@ -49,7 +62,7 @@ describe('SudokuGrid sizing', () => {
     const gridWidth = cellWidth * 9;
     // With GRID_PADDING=4: The grid should fill nearly the entire screen width
     // Expected: cellSize = floor((screenWidth - 8) / 9), so gridWidth = cellSize * 9
-    // This gives us at least (screenWidth - 8 - 8) / screenWidth = (screenWidth - 16) / screenWidth ≈ 0.98 on small screens
+    // This gives us at least (screenWidth - 8) / screenWidth ≈ 0.98 on small screens
     expect(gridWidth / screenWidth).toBeGreaterThanOrEqual(0.96);
   });
 });
