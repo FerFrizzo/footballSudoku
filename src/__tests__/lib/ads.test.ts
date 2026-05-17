@@ -77,8 +77,13 @@ describe('showInterstitialIfDue — listener cleanup', () => {
 
   it('unsubscribes BOTH listeners when show() rejects', async () => {
     await setup();
+    const { InterstitialAd } = require('react-native-google-mobile-ads');
+    const createSpy = jest.spyOn(InterstitialAd, 'createForAdRequest');
+    const createCountBefore = createSpy.mock.calls.length;
     mockInterstitial.show.mockRejectedValueOnce(new Error('show failed'));
     await showInterstitialIfDue('u1');
     expect(mockUnsub).toHaveBeenCalledTimes(2);
+    expect(createSpy.mock.calls.length).toBe(createCountBefore + 1); // loadAd() was called
+    createSpy.mockRestore();
   });
 });

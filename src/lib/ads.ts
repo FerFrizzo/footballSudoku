@@ -89,6 +89,7 @@ export function showInterstitialIfDue(
       unsubError?.();
     }
 
+    // cleanup() is idempotent: unsub functions from react-native-google-mobile-ads are safe to call multiple times
     unsubClose = interstitial.addAdEventListener(AdEventType.CLOSED, () => {
       cleanup();
       loadAd();
@@ -103,6 +104,7 @@ export function showInterstitialIfDue(
     trackEvent('ad_interstitial_shown', {}, userId, deviceId);
     interstitial.show().catch(() => {
       cleanup();
+      loadAd();
       resolve();
     });
   });
