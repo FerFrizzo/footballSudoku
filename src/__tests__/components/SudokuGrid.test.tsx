@@ -60,9 +60,8 @@ describe('SudokuGrid sizing', () => {
       .reduce((found: number, s: any) => (s.width !== undefined ? s.width : found), 0);
 
     const gridWidth = cellWidth * 9;
-    // With GRID_PADDING=4: The grid should fill nearly the entire screen width
-    // Expected: cellSize = floor((screenWidth - 8) / 9), so gridWidth = cellSize * 9
-    // This gives us at least (screenWidth - 8) / screenWidth ≈ 0.98 on small screens
+    // With GRID_PADDING=4 (8px total): cellSize = floor((375-8)/9) = 40
+    // gridWidth = 40 * 9 = 360, ratio = 360/375 = 0.96
     expect(gridWidth / screenWidth).toBeGreaterThanOrEqual(0.96);
   });
 });
