@@ -8,8 +8,8 @@ import Animated, {
 import { useTheme } from '../theme/ThemeProvider';
 
 const screenWidth = Dimensions.get('window').width;
-const GRID_PADDING = 16;
-const GRID_SIZE = Math.min(screenWidth - GRID_PADDING * 2, 400);
+const GRID_PADDING = 4;
+const GRID_SIZE = screenWidth - GRID_PADDING * 2;
 const CELL_SIZE = Math.floor(GRID_SIZE / 9);
 const ACTUAL_GRID = CELL_SIZE * 9;
 

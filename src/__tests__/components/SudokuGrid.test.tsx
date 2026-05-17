@@ -1,0 +1,55 @@
+import React from 'react';
+import { render } from '@testing-library/react-native';
+import { Dimensions } from 'react-native';
+import SudokuGrid from '../../components/SudokuGrid';
+
+const emptyBoard = Array(9).fill(null).map(() => Array(9).fill(0));
+const emptyBool  = Array(9).fill(null).map(() => Array(9).fill(false));
+const emptyNotes = Array(9).fill(null).map(() => Array(9).fill(null).map(() => []));
+
+jest.mock('../../theme/ThemeProvider', () => ({
+  useTheme: () => ({
+    surface: '#fff',
+    cellSelected: '#add8e6',
+    cellSameNumber: '#fffacd',
+    cellHighlight: '#d3d3d3',
+    text: '#000',
+    error: '#f00',
+    primaryOnSurface: '#000',
+    gridBorder: '#000',
+    gridLine: '#ccc',
+    textSecondary: '#555',
+  }),
+}));
+
+describe('SudokuGrid sizing', () => {
+  it('grid uses at least 96% of screen width', () => {
+    const { getByTestId } = render(
+      <SudokuGrid
+        board={emptyBoard}
+        given={emptyBool}
+        notes={emptyNotes}
+        selectedRow={-1}
+        selectedCol={-1}
+        conflicts={emptyBool}
+        errors={emptyBool}
+        onCellPress={() => {}}
+      />
+    );
+
+    const screenWidth = Dimensions.get('window').width;
+    const cell = getByTestId('cell-0-0');
+    const styleArray: any[] = Array.isArray(cell.props.style)
+      ? cell.props.style
+      : [cell.props.style];
+    const cellWidth: number = styleArray
+      .filter(Boolean)
+      .reduce((found: number, s: any) => (s.width !== undefined ? s.width : found), 0);
+
+    const gridWidth = cellWidth * 9;
+    // With GRID_PADDING=4: The grid should fill nearly the entire screen width
+    // Expected: cellSize = floor((screenWidth - 8) / 9), so gridWidth = cellSize * 9
+    // This gives us at least (screenWidth - 8 - 8) / screenWidth = (screenWidth - 16) / screenWidth ≈ 0.98 on small screens
+    expect(gridWidth / screenWidth).toBeGreaterThanOrEqual(0.96);
+  });
+});
