@@ -36,14 +36,12 @@ function loadAd() {
   adLoaded = false;
   interstitial = InterstitialAd.createForAdRequest(getAdUnitId());
 
-  const unsubLoaded = interstitial.addAdEventListener(AdEventType.LOADED, () => {
+  interstitial.addAdEventListener(AdEventType.LOADED, () => {
     adLoaded = true;
-    unsubLoaded();
   });
 
-  const unsubError = interstitial.addAdEventListener(AdEventType.ERROR, () => {
+  interstitial.addAdEventListener(AdEventType.ERROR, () => {
     adLoaded = false;
-    unsubError();
   });
 
   interstitial.load();
@@ -81,18 +79,29 @@ export function showInterstitialIfDue(
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { AdEventType } = require('react-native-google-mobile-ads');
 
-    const unsubClose = interstitial.addAdEventListener(AdEventType.CLOSED, () => {
-      unsubClose();
+    let unsubClose: () => void;
+    let unsubError: () => void;
+
+    function cleanup() {
+      unsubClose?.();
+      unsubError?.();
+    }
+
+    unsubClose = interstitial.addAdEventListener(AdEventType.CLOSED, () => {
+      cleanup();
       loadAd();
       resolve();
     });
 
-    const unsubError = interstitial.addAdEventListener(AdEventType.ERROR, () => {
-      unsubError();
+    unsubError = interstitial.addAdEventListener(AdEventType.ERROR, () => {
+      cleanup();
       resolve();
     });
 
     trackEvent('ad_interstitial_shown', {}, userId, deviceId);
-    interstitial.show().catch(() => resolve());
+    interstitial.show().catch(() => {
+      cleanup();
+      resolve();
+    });
   });
 }
