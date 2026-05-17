@@ -1,4 +1,4 @@
-import { showInterstitialIfDue, initializeAds } from '../../lib/ads';
+import { showInterstitialIfDue, initializeAds, __resetForTesting } from '../../lib/ads';
 
 jest.mock('expo-constants', () => ({
   default: { executionEnvironment: 'bare' },
@@ -42,6 +42,7 @@ function fireEvent(event: string) {
 }
 
 beforeEach(() => {
+  __resetForTesting();
   Object.keys(listeners).forEach((k) => delete listeners[k]);
   mockUnsub.mockClear();
   mockInterstitial.show.mockClear();

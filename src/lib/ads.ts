@@ -114,3 +114,12 @@ export function showInterstitialIfDue(
     });
   });
 }
+
+/**
+ * For testing only — resets module-level state between tests
+ */
+export function __resetForTesting() {
+  initialized = false;
+  adLoaded = false;
+  interstitial = null;
+}
